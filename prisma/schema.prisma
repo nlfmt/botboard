@@ -7,8 +7,38 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id    Int    @id @default(autoincrement())
-    title String
-    body  String
+model User {
+    name     String  @id @unique
+    email    String  @unique
+    password String
+    admin    Boolean @default(false)
+    Bot      Bot[]
+}
+
+model Bot {
+    id            String    @id @default(uuid())
+    name          String
+    clientId      String
+    clientSecret  String
+    totalLogs     Int       @default(0)
+    totalCommands Int       @default(0)
+    logs          Log[]
+    commands      Command[]
+    connected     Boolean   @default(false)
+    owner         User      @relation(fields: [userName], references: [name])
+    userName      String
+}
+
+model Log {
+    id    String  @id @default(uuid())
+    bot   Bot?    @relation(fields: [botId], references: [id])
+    botId String?
+}
+
+model Command {
+    id      String  @id @default(uuid())
+    name    String
+    options String
+    Bot     Bot?    @relation(fields: [botId], references: [id])
+    botId   String?
 }

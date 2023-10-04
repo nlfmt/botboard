@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { httpBatchLink } from "@trpc/client"
-import api from "./util/api"
+import api, { API_URL, getAuthCookie } from "./util/api"
 import Showcase from "./Showcase";
 
 function App() {
@@ -11,11 +11,10 @@ function App() {
     api.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:3001/api/trpc",
-          // You can pass any HTTP headers you wish here
+          url: API_URL,
           async headers() {
             return {
-              // authorization: getAuthCookie(),
+              authorization: getAuthCookie(),
             }
           },
         }),

@@ -9,6 +9,7 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     assetsDir: "./static",
+    emptyOutDir: true,
     minify: true,
     rollupOptions: {
       input: {

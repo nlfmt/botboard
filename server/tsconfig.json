@@ -1,16 +1,16 @@
 {
     "compilerOptions": {
-        "baseUrl": "./server",
+        "composite": true,
         "strict": true,
-        "outDir": "dist",
+        "outDir": "../dist",
         "sourceMap": false,
-        "declaration": false,
         "skipLibCheck": true,
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "target": "ESNext",
         "lib": ["ESNext"],
+        "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
     },
-    "include": ["server/**/*"]
+    "include": ["**/*"],
 }

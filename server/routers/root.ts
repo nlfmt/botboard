@@ -1,16 +1,8 @@
 import z from "zod";
-import { publicProcedure, router } from "../util/trpc";
-import prisma from "../util/prisma";
+import { createRouter } from "../util/trpc";
+import { authRouter } from "./auth";
 
-export const appRouter = router({
-    test: publicProcedure.input(z.string()).query(async ({ input } )=> {
-        await prisma.example.create({
-            data: {
-                body: input,
-                title: `Hello ${input}!`
-            }
-        })
-        return await prisma.example.findMany()
-    }),
+export const appRouter = createRouter({
+    auth: authRouter
 })
 export type AppRouter = typeof appRouter;

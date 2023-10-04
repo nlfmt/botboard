@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 .env
+certs
 prisma/db.sqlite
