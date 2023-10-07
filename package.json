@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "vite build && tsc -p server",
-    "dev": "concurrently \"vite --port 3000\" \"tsc --watch --preserveWatchOutput -p server/tsconfig.json\" \"nodemon --watch dist dist/server.js\"",
+    "dev": "concurrently \"vite --port 3000\" \"tsc --watch --preserveWatchOutput -p server/tsconfig.json\" \"nodemon dist/server.js\"",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -48,5 +48,12 @@
     "sass": "^1.68.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.5"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "dist",
+      ".env"
+    ],
+    "ext": "js,mjs,json,env"
   }
 }

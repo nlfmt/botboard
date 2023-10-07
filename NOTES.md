@@ -1,5 +1,9 @@
 # Ideas
 - load discord user info from api to show profile picture & info in ui
+- add rate limiter (express-rate-limit)[https://www.npmjs.com/package/express-rate-limit]
+- implement CSRF protection
+- make advanced router also verify query params etc
+- .input() + .params() / .query() also add .use() middleware support
 
 # Page Layout
 - Home Page

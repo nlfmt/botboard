@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Credentials
 .env
 certs
+*.pem
+
+# DB files
 prisma/db.sqlite

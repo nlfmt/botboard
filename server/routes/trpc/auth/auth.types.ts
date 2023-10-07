@@ -14,9 +14,3 @@ export const LoginRequestModel = z.object({
     password: PasswordModel
 })
 export type LoginRequest = z.infer<typeof LoginRequestModel>
-
-export const tokenDataModel = z.object({
-    name: z.string(),
-    email: z.string()
-})
-export type TokenData = z.infer<typeof tokenDataModel>
