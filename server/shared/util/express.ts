@@ -41,9 +41,9 @@ type Combine<
   ? U
   : null
 type ExtractUrlParams<T extends string> =
-  T extends `${infer Start}:${infer Param}/${infer Rest}`
+  T extends `${infer _}:${infer Param}/${infer Rest}`
     ? Param | ExtractUrlParams<Rest>
-    : T extends `${infer Start}:${infer Param}`
+    : T extends `${infer _}:${infer Param}`
     ? Param
     : never
 type VoidToNull<T> = T extends void ? null : T

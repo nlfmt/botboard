@@ -1,6 +1,5 @@
-import z, { ZodError } from "zod"
+import { ZodError } from "zod"
 import dotenv from "dotenv"
-import path from "path"
 import { envModel } from "../../env"
 
 export function onInvalidEnv(err: ZodError) {

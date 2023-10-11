@@ -51,6 +51,10 @@ export const authRouter = createTRPCRouter({
 
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
 
+      if (!await bcrypt.compare(password, user.password)) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong Password" })
+      }
+
       const { accessToken, refreshToken } = createTokens({
         name: user.name,
         email: user.email,

@@ -92,7 +92,7 @@ devDependencies:
     specifier: ^8.2.1
     version: 8.2.1
   eslint:
-    specifier: ^8.45.0
+    specifier: ^8.50.0
     version: 8.50.0
   eslint-plugin-react-hooks:
     specifier: ^4.6.0

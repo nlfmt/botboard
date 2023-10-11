@@ -3,12 +3,10 @@ import viteLogo from "../public/vite.svg"
 import c from "./App.module.scss"
 import { classes } from "./util/util"
 import { useState } from "react"
-import api from "./util/api"
 
 const Showcase = () => {
   const [count, setCount] = useState(0)
 
-  const { data } = api.auth.login.useMutation()
 
   return (
     <>
