@@ -8,7 +8,7 @@ import { initEnv } from "./shared/util/init-env"
 import { trpcRouter } from "./routes/trpc/root"
 import apiRouter from "./routes/api/root"
 
-initEnv("../.env")
+initEnv(path.join(__dirname, "../.env"))
 
 const cert = "../certs/cert.pem"
 const key = "../certs/key.pem"

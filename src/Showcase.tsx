@@ -8,6 +8,7 @@ import api from "./util/api"
 const Showcase = () => {
   const [count, setCount] = useState(0)
 
+  const { data } = api.auth.login.useMutation()
 
   return (
     <>

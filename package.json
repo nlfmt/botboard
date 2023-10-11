@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "postinstall": "prisma generate",
     "start": "node dist/server.js",
     "build": "vite build && tsc -p server",
     "dev": "concurrently \"vite --port 3000\" \"tsc --watch --preserveWatchOutput -p server/tsconfig.json\" \"nodemon dist/server.js\"",
@@ -12,9 +13,10 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "5.3.1",
+    "@prisma/client": "5.4.1",
     "@trpc/server": "^10.38.5",
     "@types/jsonwebtoken": "^9.0.3",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -29,6 +31,7 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@trpc/client": "^10.38.5",
     "@trpc/react-query": "^10.38.5",
+    "@types/bcrypt": "^5.0.0",
     "@types/cors": "^2.8.14",
     "@types/express": "^4.17.18",
     "@types/morgan": "^1.9.6",
@@ -44,7 +47,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "nodemon": "^3.0.1",
-    "prisma": "^5.3.1",
+    "prisma": "^5.4.1",
     "sass": "^1.68.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.5"
@@ -52,7 +55,9 @@
   "nodemonConfig": {
     "watch": [
       "dist",
-      ".env"
+      ".env",
+      "certs",
+      "public"
     ],
     "ext": "js,mjs,json,env"
   }

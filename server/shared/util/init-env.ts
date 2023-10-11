@@ -12,9 +12,9 @@ export function onInvalidEnv(err: ZodError) {
   process.exit(1)
 }
 
-export function initEnv(file: string) {
+export function initEnv(path: string) {
   dotenv.config({
-    path: path.join(__dirname, file),
+    path,
   })
   const result = envModel.safeParse(process.env)
   if (!result.success) onInvalidEnv(result.error)
