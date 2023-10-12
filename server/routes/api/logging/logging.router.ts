@@ -1,33 +1,27 @@
-import { createRouter } from "../../../shared/util/express";
+import { createRouter } from "../../../shared/util/route-builder";
 import { logCreateModel } from "./logging.types";
 
 const loggingRouter = createRouter()
 
 loggingRouter
+  .path("/log")
   .body(logCreateModel)
-  .query(logCreateModel)
   .use(({ req }) => {
     return { somedata: req.url }
   })
-  .use((data) => {
-    console.log("got data:", data.data.somedata)
+  .use(({data}) => {
+    console.log("got data:", data.somedata)
   })
-  .post("/log", ({ res, data }) => {
+  .post(({ res, data }) => {
     
     console.log({data})
     res.status(200).send("noice")
   })
 
-loggingRouter // TODO: force first fn to be .path("/test")
-  .body(logCreateModel) // TODO: BodyTypes.File ?
-  .query(logCreateModel)
-  .use(({ req }) => {
-    return { somedata: req.url }
-  })
-  .use((data) => {
-    console.log("got data:", data.data.somedata)
-  })
-  .post("/log", ({ res, data }) => {
+loggingRouter
+  .path("/log")
+  .body(logCreateModel) // TODO: BodyType.File ?
+  .post(({ res, data }) => {
     
     console.log({data})
     res.status(200).send("noice")
