@@ -13,14 +13,12 @@ loggingRouter
     console.log("got data:", data.somedata)
   })
   .post(({ res, data }) => {
-    
-    console.log({data})
-    res.status(200).send("noice")
+    res.status(200).send("noice dddd1234")
   })
 
 loggingRouter
   .path("/log")
-  .body(logCreateModel) // TODO: BodyType.File ?
+  .body(logCreateModel)
   .post(({ res, data }) => {
     
     console.log({data})

@@ -1,0 +1,49 @@
+.page {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+
+  .content {
+    margin-top: 10rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .heading {
+      position: relative;
+      margin-bottom: 1rem;
+
+      font-size: 6rem;
+      font-weight: 700;
+      color: var(--primary);
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 80%;
+
+        background-color: var(--primary);
+        opacity: 0.1;
+        filter: blur(40px);
+      }
+    }
+
+    .text {
+      font-size: 1.2rem;
+      text-align: center;
+
+      .link {
+        color: var(--secondary);
+        text-decoration: underline;
+        filter: drop-shadow(0 0 15px rgba(var(--secondary-light-), 0.5));
+
+        &:hover {
+          color: var(--secondary-light);
+        }
+      }
+    }
+  }
+}

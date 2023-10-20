@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "scripts": {
     "postinstall": "prisma generate",
-    "start": "node dist/server.js",
+    "start": "cross-env NODE_ENV=production node build/server.js",
     "build": "vite build && tsc -p server",
-    "dev": "concurrently \"vite --port 3000\" \"tsc --watch --preserveWatchOutput -p server/tsconfig.json\" \"nodemon dist/server.js\"",
+    "dev": "concurrently -n vite,node -c \"magenta,green\" \"vite\" \"nodemon\"",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -15,11 +15,11 @@
   "dependencies": {
     "@prisma/client": "5.4.1",
     "@trpc/server": "^10.38.5",
-    "@types/jsonwebtoken": "^9.0.3",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "react": "^18.2.0",
@@ -27,6 +27,10 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.13",
+    "@mui/material": "^5.14.13",
     "@tanstack/react-query": "^4.35.7",
     "@total-typescript/ts-reset": "^0.5.1",
     "@trpc/client": "^10.38.5",
@@ -34,31 +38,39 @@
     "@types/bcrypt": "^5.0.0",
     "@types/cors": "^2.8.14",
     "@types/express": "^4.17.18",
+    "@types/jsonwebtoken": "^9.0.3",
     "@types/morgan": "^1.9.6",
     "@types/node": "^20.8.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "chokidar": "^3.5.3",
     "concurrently": "^8.2.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8.50.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "nodemon": "^3.0.1",
     "prisma": "^5.4.1",
+    "react-router-dom": "^6.17.0",
     "sass": "^1.68.0",
+    "sucrase": "^3.34.0",
     "typescript": "^5.2.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vite-plugin-svgr": "^4.1.0"
   },
   "nodemonConfig": {
     "watch": [
-      "dist",
+      "server",
       ".env",
       "certs",
       "public"
     ],
-    "ext": "js,mjs,json,env"
+    "ext": "ts,json,env",
+    "exec": "sucrase -q ./server -d ./build --transforms typescript,imports && node build/server.js",
+    "delay": "300"
   }
 }

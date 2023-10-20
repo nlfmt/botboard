@@ -9,6 +9,8 @@
 - Home Page
   - Show general stats: # of users, # of bots, # of logs, # of command runs
   - Show recent logs & commands (list view)
+  - Show latest errors (list view)
+  - show graph of logs & commands over time, with time range selector (1h, 1d, 1w, 1m, 1y)
   - Show list of your own bots
 - Bot Page
   - running/dead status

@@ -1,0 +1,10 @@
+.card {
+  border: 1px solid var(--divider);
+  background-color: var(--bg1);
+  padding: var(--spacing-m);
+  border-radius: var(--radius-m);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}

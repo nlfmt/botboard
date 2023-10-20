@@ -1,0 +1,77 @@
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+  color: var(--text);
+  cursor: pointer;
+  padding: var(--spacing-s);
+  border-radius: var(--radius-m);
+  background-color: var(--bg1);
+  border: 1px solid var(--divider);
+  transition: color 50ms ease;
+
+  &[data-active=true] {
+    color: var(--clr);
+    border: 1px solid var(--clr);
+    background-color: rgba(var(--clr-), 10%);
+  }
+
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    height: 50%;
+    width: 30px;
+    left: 0;
+    top: 0;
+    transform: translateY(50%);
+    border-radius: var(--radius-m);
+    background-color: var(--clr);
+    opacity: 0;
+    transition: opacity 50ms ease;
+    filter: blur(15px);
+  }
+
+  &:not([data-active="true"]):hover {
+    color: var(--clr);
+
+    &::before {
+      opacity: 0.3;
+      animation: pulse 1s infinite ease-in-out;
+    }
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &[data-type=primary] {
+    --clr: var(--primary);
+    --clr-: var(--primary-);
+  }
+  &[data-type=secondary] {
+    --clr: var(--secondary);
+    --clr-: var(--secondary-);
+  }
+  &[data-type=danger] {
+    --clr: var(--danger);
+    --clr-: var(--danger-);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}

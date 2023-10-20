@@ -24,8 +24,6 @@
     /* Path Aliases */
     "paths": {
       "@/*": ["./*"],
-      "@assets/*": ["./assets/*"],
-      "@components/*": ["./components/*"],
       "@server/*": ["../server/*"],
     },
   },

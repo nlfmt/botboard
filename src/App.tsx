@@ -2,7 +2,8 @@ import { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { httpBatchLink } from "@trpc/client"
 import api, { API_URL, getAuthCookie } from "./util/api"
-import Showcase from "./Showcase";
+import { RouterProvider } from "react-router-dom"
+import { router } from "@/App.routes"
 
 function App() {
 
@@ -25,7 +26,7 @@ function App() {
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <Showcase />
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </api.Provider>
   )

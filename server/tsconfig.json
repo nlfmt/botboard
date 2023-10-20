@@ -2,7 +2,7 @@
     "compilerOptions": {
         "composite": true,
         "strict": true,
-        "outDir": "../dist",
+        "outDir": "../build",
         "sourceMap": false,
         "skipLibCheck": true,
         "module": "nodenext",

@@ -1,0 +1,48 @@
+.info {
+  background-color: var(--bg1);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-m);
+  padding: var(--spacing-s) var(--spacing-s);
+
+  display: flex;
+  gap: var(--spacing-m);
+  
+  .profilePicture {
+    height: 4rem;
+    width: 4rem;
+    border-radius: var(--radius-s);
+    object-fit: cover;
+  }
+
+  .profilePictureReplacement {
+    height: 4rem;
+    width: 4rem;
+    border-radius: var(--radius-s);
+    background-color: var(--primary);
+    color: var(--primary-light);
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 0 0 1.5rem rgba(0,0,0, 1);
+    border: 1px solid var(--primary-light);
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--spacing-xs);
+
+    .name {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .email {
+      font-size: 0.9rem;
+      opacity: 0.75;
+    }
+  }
+}

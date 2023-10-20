@@ -1,0 +1,27 @@
+.text {
+    color: var(--text-color, var(--text));
+    font-size: 0.8rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+
+    &[data-weight=bold] {
+      font-weight: bold;
+    }
+    &[data-weight=light] {
+      font-weight: lighter;
+    }
+
+    &[data-size=small] {
+      font-size: 0.7rem;
+    }
+    &[data-size=medium] {
+      font-size: 1rem;
+    }
+    &[data-size=large] {
+      font-size: 1.1rem;
+    }
+    &[data-size=x-large] {
+      font-size: 1.3rem;
+    }
+}

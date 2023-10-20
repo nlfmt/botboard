@@ -1,0 +1,8 @@
+.heading {
+    color: var(--heading-color, var(--text));
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+    font-weight: lighter;
+    opacity: 0.75;
+}

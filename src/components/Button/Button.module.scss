@@ -1,0 +1,31 @@
+.button {
+  background-color: var(--bg1);
+  color: var(--text);
+  border-radius: var(--radius-s);
+  border: none;
+  border-top: 1px solid var(--divider);
+
+  display: flex;
+  gap: var(--spacing-m);
+  align-items: center;
+  padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-m);
+
+  font-weight: normal;
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  transition: background-color 50ms ease-in-out, color 50ms ease-in-out;
+
+  svg {
+    width: 20px;
+  }
+
+  &:hover {
+    // background-color: var(--bg2);
+    color: var(--primary);
+  }
+}
