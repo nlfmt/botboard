@@ -1,5 +1,5 @@
-import { createRouter } from "../../../shared/util/route-builder";
-import { logCreateModel } from "./logging.types";
+import { createRouter } from "../../../shared/util/route-builder.js";
+import { logCreateModel } from "./logging.types.js";
 
 const loggingRouter = createRouter()
 

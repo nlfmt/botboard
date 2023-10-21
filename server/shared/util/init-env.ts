@@ -1,6 +1,6 @@
 import { ZodError } from "zod"
 import dotenv from "dotenv"
-import { envModel } from "../../env"
+import { envModel } from "../../env.js"
 
 export function onInvalidEnv(err: ZodError) {
   console.error("\n❌ Invalid environment variables:")

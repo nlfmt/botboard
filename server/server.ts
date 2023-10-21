@@ -5,9 +5,9 @@ import morgan from "morgan"
 import helmet from "helmet"
 import express from "express"
 import { readFileSync } from "fs"
-import apiRouter from "./routes/api/root"
-import { trpcRouter } from "./routes/trpc/root"
-import { initEnv } from "./shared/util/init-env"
+import apiRouter from "./routes/api/root.js"
+import { trpcRouter } from "./routes/trpc/root.js"
+import { initEnv } from "./shared/util/init-env.js"
 
 initEnv(path.join(__dirname, "../.env"))
 

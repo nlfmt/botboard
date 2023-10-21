@@ -2,6 +2,7 @@
   "name": "botboard",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "postinstall": "prisma generate",
     "start": "cross-env NODE_ENV=production node build/server.js",
@@ -13,6 +14,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@lucia-auth/adapter-prisma": "^3.0.2",
     "@prisma/client": "5.4.1",
     "@trpc/server": "^10.38.5",
     "bcrypt": "^5.1.1",
@@ -21,6 +23,7 @@
     "express": "^4.18.2",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lucia": "^2.7.1",
     "morgan": "^1.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

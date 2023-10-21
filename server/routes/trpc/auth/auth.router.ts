@@ -1,6 +1,6 @@
-import { LoginRequestModel, SignupRequestModel } from "./auth.types"
-import { createTokens } from "../../../shared/util/tokens"
-import { publicProcedure, createTRPCRouter } from "../../../shared/util/trpc"
+import { LoginRequestModel, SignupRequestModel } from "./auth.types.js"
+import { createTokens } from "../../../shared/util/tokens.js"
+import { publicProcedure, createTRPCRouter } from "../../../shared/util/trpc.js"
 import { TRPCError } from "@trpc/server"
 import bcrypt from "bcrypt"
 

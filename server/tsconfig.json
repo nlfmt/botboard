@@ -5,13 +5,11 @@
         "outDir": "../build",
         "sourceMap": false,
         "skipLibCheck": true,
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "target": "ESNext",
-        "lib": ["ESNext"],
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "isolatedModules": true
+        "isolatedModules": false,
+        "esModuleInterop": true
     },
     "include": ["**/*"],
 }

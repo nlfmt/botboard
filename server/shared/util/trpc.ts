@@ -1,9 +1,9 @@
 import { TRPCError, initTRPC } from "@trpc/server"
-import prisma from "./prisma"
+import prisma from "./prisma.js"
 import { Request, Response } from "express"
 import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http"
-import { verifyToken } from "./tokens"
-import { TokenData } from "../models/token.model"
+import { verifyToken } from "./tokens.js"
+import { TokenData } from "../models/token.model.js"
 
 export async function createTRPCContext({
   req,
