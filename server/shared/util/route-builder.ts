@@ -1,6 +1,6 @@
-import { Router, Request, Response } from "express"
+import { Request, Response, Router } from "express"
 import z from "zod"
-import { Error } from "./error.js"
+import { Error } from "./error"
 
 type HttpMethod =
   | "all"

@@ -1,8 +1,8 @@
-import { LoginRequestModel, SignupRequestModel } from "./auth.types.js"
-import { createTokens } from "../../../shared/util/tokens.js"
-import { publicProcedure, createTRPCRouter } from "../../../shared/util/trpc.js"
+import scrypt from "@/shared/util/scrypt"
+import { LoginRequestModel, SignupRequestModel } from "./auth.types"
+import { createTokens } from "@/shared/util/tokens"
+import { publicProcedure, createTRPCRouter } from "@/shared/util/trpc"
 import { TRPCError } from "@trpc/server"
-import bcrypt from "bcrypt"
 
 export const authRouter = createTRPCRouter({
   signup: publicProcedure
@@ -10,13 +10,13 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { name, email, password } = input
 
-      const hash = await bcrypt.hash(password, 10)
+      const hash = scrypt.hashPassword(password)
       try {
         const user = await ctx.prisma.user.create({
           data: {
             name,
             email,
-            password: hash
+            password: hash,
           },
         })
 
@@ -24,7 +24,6 @@ export const authRouter = createTRPCRouter({
           name: user.name,
           email: user.email,
         })
-        
 
         return {
           accessToken,
@@ -32,10 +31,13 @@ export const authRouter = createTRPCRouter({
           user: {
             name: user.name,
             email: user.email,
-          }
+          },
         }
       } catch (error) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "User already exists" })
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User already exists",
+        })
       }
     }),
 
@@ -49,9 +51,10 @@ export const authRouter = createTRPCRouter({
         },
       })
 
-      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
+      if (!user)
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
 
-      if (!await bcrypt.compare(password, user.password)) {
+      if (!(await scrypt.verifyPassword(password, user.password))) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong Password" })
       }
 
@@ -66,7 +69,7 @@ export const authRouter = createTRPCRouter({
         user: {
           name: user.name,
           email: user.email,
-        }
+        },
       }
     }),
 })

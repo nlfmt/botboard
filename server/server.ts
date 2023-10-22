@@ -5,11 +5,17 @@ import morgan from "morgan"
 import helmet from "helmet"
 import express from "express"
 import { readFileSync } from "fs"
-import apiRouter from "./routes/api/root.js"
-import { trpcRouter } from "./routes/trpc/root.js"
-import { initEnv } from "./shared/util/init-env.js"
+import apiRouter from "@/routes/api/root"
+import { trpcRouter } from "@/routes/trpc/root"
+import { initEnv } from "@/shared/util/init-env"
+import { fileURLToPath } from "url"
 
-initEnv(path.join(__dirname, "../.env"))
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const relativePath = (...paths: string[]) =>
+  path.join(path.dirname(fileURLToPath(import.meta.url)), ...paths)
+
+initEnv(relativePath("../.env"))
+
 
 const cert = "../certs/cert.pem"
 const key = "../certs/key.pem"
@@ -24,13 +30,13 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 
-app.use("/static", express.static(path.join(__dirname, "static")))
+app.use("/static", express.static(relativePath("static")))
 
 app.use("/api/trpc", trpcRouter)
 app.use("/api", apiRouter)
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"))
+  res.sendFile(relativePath("index.html"))
 })
 
 
@@ -42,8 +48,10 @@ const server = https.createServer(
   app
 )
 
-const SERVER_PORT = process.env.NODE_ENV === "production" ? PORT : 3001
+if (import.meta.env.PROD) {
+  server.listen(PORT, () => {
+    console.log(`\n\x1b[1;94mBotBoard Backend running on port ${PORT}\x1b[0m\n`)
+  })
+}
 
-server.listen(SERVER_PORT, () => {
-  console.log(`\n\x1b[1;94mBotBoard Backend running on port ${SERVER_PORT}\x1b[0m\n`)
-})
+export const viteNodeApp = app

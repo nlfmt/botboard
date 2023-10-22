@@ -1,10 +1,11 @@
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
-import env from "../../env.js"
+import env from "@/env"
 import {
   TokenData,
   TokenDataPayload,
   tokenDataModel,
-} from "../models/token.model.js"
+} from "../models/token.model"
+
 
 export type SafeError<T> =
   | { error: string; success: false }

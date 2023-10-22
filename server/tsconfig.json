@@ -5,11 +5,14 @@
         "outDir": "../build",
         "sourceMap": false,
         "skipLibCheck": true,
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
         "target": "ESNext",
         "isolatedModules": false,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "paths": {
+            "@/*": ["./*"],
+        },
     },
     "include": ["**/*"],
 }

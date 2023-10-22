@@ -1,6 +1,6 @@
-import { createTRPCRouter, createTRPCContext } from "../../shared/util/trpc.js";
-import { authRouter } from "./auth/auth.router.js";
+import { createTRPCRouter, createTRPCContext } from "@/shared/util/trpc";
 import * as trpcExpress from "@trpc/server/adapters/express"
+import { authRouter } from "./auth/auth.router";
 
 /**
  * All TRPC subrouters

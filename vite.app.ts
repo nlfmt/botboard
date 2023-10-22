@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react-swc"
 import { fileURLToPath } from "url"
 import svgr from "vite-plugin-svgr"
 
+const alias = (path: string) => fileURLToPath(new URL(path, import.meta.url))
+
+
 // https://vitejs.dev/config/
 export default defineConfig({
   root: "./src",
@@ -10,7 +13,7 @@ export default defineConfig({
   build: {
     outDir: "../build",
     assetsDir: "./static",
-    emptyOutDir: true,
+    emptyOutDir: false,
     minify: true,
     rollupOptions: {
       input: {
@@ -21,7 +24,6 @@ export default defineConfig({
   server: {
     cors: true,
     port: 3000,
-    host: "0.0.0.0"
   },
   plugins: [
     svgr({
@@ -34,8 +36,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "@server": fileURLToPath(new URL("./server", import.meta.url)),
+      "@": alias("./src"),
+      "@server": alias("./server"),
     },
   },
 })

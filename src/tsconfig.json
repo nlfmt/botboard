@@ -27,7 +27,7 @@
       "@server/*": ["../server/*"],
     },
   },
-  "include": ["**/*"],
+  "include": ["**/*", "../vite-env.d.ts"],
   "references": [
     { "path": "../server" },
   ]
