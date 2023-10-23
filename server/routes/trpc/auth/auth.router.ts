@@ -1,7 +1,7 @@
 import scrypt from "@/shared/util/scrypt"
 import { LoginRequestModel, SignupRequestModel } from "./auth.types"
 import { createTokens } from "@/shared/util/tokens"
-import { publicProcedure, createTRPCRouter } from "@/shared/util/trpc"
+import { publicProcedure, createTRPCRouter } from "@/shared/trpc"
 import { TRPCError } from "@trpc/server"
 
 export const authRouter = createTRPCRouter({

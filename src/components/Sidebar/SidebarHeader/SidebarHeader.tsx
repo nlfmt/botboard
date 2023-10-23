@@ -10,7 +10,7 @@ const SidebarHeader = () => {
         <span className={c.rightPart}>board</span>
       </h1>
       {nTimes(9, (n) => (
-        <AddRounded className={c.decor} data-index={n} />
+        <AddRounded key={n} className={c.decor} data-index={n} />
       ))}
     </header>
   )

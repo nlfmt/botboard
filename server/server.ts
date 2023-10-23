@@ -5,6 +5,7 @@ import morgan from "morgan"
 import helmet from "helmet"
 import express from "express"
 import { readFileSync } from "fs"
+import cookieParser from "cookie-parser"
 import apiRouter from "@/routes/api/root"
 import { trpcRouter } from "@/routes/trpc/root"
 import { initEnv } from "@/shared/util/init-env"
@@ -23,10 +24,11 @@ const PORT = process.env.PORT ?? 3000
 
 const app = express()
 
-app.use(cors())
+app.use(cors({ credentials: true }))
 app.use(helmet())
 app.use(morgan("common"))
 app.use(express.json())
+app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
 
 
@@ -54,4 +56,4 @@ if (import.meta.env.PROD) {
   })
 }
 
-export const viteNodeApp = app
+export const viteNodeApp: express.Express = app

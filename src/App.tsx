@@ -18,6 +18,12 @@ function App() {
               authorization: getAuthCookie(),
             }
           },
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: "include",
+            })
+          }
         }),
       ],
     })

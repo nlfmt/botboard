@@ -15,14 +15,16 @@
   },
   "dependencies": {
     "@lucia-auth/adapter-prisma": "^3.0.2",
+    "@lucia-auth/oauth": "^3.3.1",
     "@prisma/client": "5.4.1",
     "@trpc/server": "^10.38.5",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
-    "lucia": "^2.7.1",
+    "lucia": "^2.7.2",
     "morgan": "^1.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -38,7 +40,7 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@trpc/client": "^10.38.5",
     "@trpc/react-query": "^10.38.5",
-    "@types/bcrypt": "^5.0.0",
+    "@types/cookie-parser": "^1.4.5",
     "@types/cors": "^2.8.14",
     "@types/express": "^4.17.18",
     "@types/express-serve-static-core": "^4.17.39",
@@ -57,25 +59,12 @@
     "eslint": "^8.50.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "nodemon": "^3.0.1",
     "prisma": "^5.4.1",
     "react-router-dom": "^6.17.0",
     "sass": "^1.68.0",
-    "sucrase": "^3.34.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.5",
     "vite-plugin-node": "^3.0.2",
     "vite-plugin-svgr": "^4.1.0"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "server",
-      ".env",
-      "certs",
-      "public"
-    ],
-    "ext": "ts,json,env",
-    "exec": "sucrase -q ./server -d ./build --transforms typescript,imports && node build/server.js",
-    "delay": "300"
   }
 }

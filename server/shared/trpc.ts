@@ -2,39 +2,37 @@ import { TRPCError, initTRPC } from "@trpc/server"
 import prisma from "./prisma"
 import { Request, Response } from "express"
 import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http"
-import { verifyToken } from "./tokens"
-import { TokenData } from "../models/token.model"
+import { verifyToken } from "./util/tokens"
+import { TokenData } from "./models/token.model"
+import { auth } from "./lucia"
 
 export async function createTRPCContext({
   req,
+  res,
 }: NodeHTTPCreateContextFnOptions<Request, Response>) {
-  const token = req.headers.authorization?.split(" ")[1]
-  let user: TokenData | undefined
-
-  if (token) {
-    const res = verifyToken(token)
-    if (res.success) {
-      user = res.data
-    }
-  }
-
   return {
     prisma,
-    user,
+    req, res
   }
 }
 
 const t = initTRPC.context<typeof createTRPCContext>().create()
 
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.user) {
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  console.log("enforceUserIsAuthed", ctx.req.headers)
+  const authRequest = auth.handleRequest(ctx.req, ctx.res)
+  const session = await authRequest.validate()
+
+  console.log({ session })
+
+  if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
   return next({
     ctx: {
       ...ctx,
-      user: ctx.user,
+      user: session.user,
     },
   })
 })

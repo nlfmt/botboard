@@ -31,7 +31,7 @@ type ExtractUrlParamNames<T extends string> =
     ? Param
     : never
 /** Get object of params from url string */
-type ExtractUrlParams<T extends string> = { [K in ExtractUrlParamNames<T>]: string }
+type UrlParamSchema<Path extends string> = { [K in ExtractUrlParamNames<Path>]: z.ZodSchema }
 /** Replaces `void` with `null` */
 type VoidToNull<T> = T extends void ? null : T
 
@@ -40,6 +40,8 @@ type RouteSchema = {
   body: z.ZodSchema
   query: z.ZodSchema
   cookies: z.ZodSchema
+  params: z.ZodSchema
+  data: object | null
 }
 
 export type ErrorFunction = (error: Error) => void
@@ -47,19 +49,23 @@ export type ErrorFunction = (error: Error) => void
 /**
  * Route Handler function
  */
-export type RouteHandler<Schema extends RouteSchema, Data extends object | null = null, UrlParams extends object = object > = (v: {
+export type RouteHandler<Schema extends RouteSchema> = (v: {
   body: z.infer<Schema["body"]>
   query: z.infer<Schema["query"]>
   cookies: z.infer<Schema["cookies"]>
-  params: UrlParams
+  params: z.infer<Schema["params"]>
+  data: Schema["data"]
   req: Request
   res: Response
-  data: Data
   error: ErrorFunction
 }) => void
 
 /** A Middleware function */
 type Middleware<Data extends object | null = null, NewData extends object | void = object> = (args: {req: Request, res: Response, data: Data }) => NewData
+
+type ConstrainedSchema<Keys, Schema> = {
+  [K in keyof Schema]: K extends Keys ? Schema[K] : never;
+};
 
 /**
  * Route Builder class that allows for easy creation of routes
@@ -69,13 +75,15 @@ export class RouteBuilder<
   TBody extends z.ZodSchema = z.ZodSchema<null>,
   TQuery extends z.ZodSchema = z.ZodSchema<null>,
   TCookies extends z.ZodSchema = z.ZodSchema<null>,
+  TParams extends z.ZodSchema = z.ZodSchema<null>,
   TData extends object | null = null,
-  Schema extends RouteSchema = { body: TBody; query: TQuery; cookies: TCookies }
+  Schema extends RouteSchema = { body: TBody; query: TQuery; cookies: TCookies, params: TParams, data: TData }
 > {
   public router: Router
   private bodySchema?: TBody
   private querySchema?: TQuery
   private cookieSchema?: TCookies
+  private paramSchema?: TParams
   private middleware: Middleware<object | null>[] = []
   private path: Path
 
@@ -87,9 +95,10 @@ export class RouteBuilder<
     this.cookieSchema = opts?.cookies
   }
 
+  // TODO rewrite this to use return next({}) like trpc
   use<NewData extends object | void>(middleware: Middleware<TData, NewData>) {
     this.middleware.push(middleware as unknown as Middleware<object | null>)
-    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, Combine<TData, VoidToNull<NewData>>>
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Combine<TData, VoidToNull<NewData>>>
   }
 
   /**
@@ -98,7 +107,7 @@ export class RouteBuilder<
    */
   body<BodySchema extends z.ZodSchema>(schema: BodySchema) {
     this.bodySchema = schema as unknown as TBody
-    return this as unknown as RouteBuilder<Path, BodySchema, TQuery, TCookies>
+    return this as unknown as RouteBuilder<Path, BodySchema, TQuery, TCookies, TParams>
   }
 
   /**
@@ -107,7 +116,17 @@ export class RouteBuilder<
    */
   query<QuerySchema extends z.ZodSchema>(schema: QuerySchema) {
     this.querySchema = schema as unknown as TQuery
-    return this as unknown as RouteBuilder<Path, TBody, QuerySchema, TCookies>
+    return this as unknown as RouteBuilder<Path, TBody, QuerySchema, TCookies, TParams>
+  }
+
+  /**
+   * Specify a param schema
+   * @param schema 
+   */
+  params<ParamSchema extends UrlParamSchema<Path>>(schema: ConstrainedSchema<ExtractUrlParamNames<Path>, ParamSchema>) {
+    const zodSchema = z.object(schema)
+    this.paramSchema = zodSchema as unknown as TParams
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, typeof zodSchema>
   }
 
   /**
@@ -116,7 +135,7 @@ export class RouteBuilder<
    */
   cookies<CookiesSchema extends z.ZodSchema>(schema: CookiesSchema) {
     this.cookieSchema = schema as unknown as TCookies
-    return this as unknown as RouteBuilder<Path, TBody, TQuery, CookiesSchema>
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, CookiesSchema, TParams>
   }
 
   /**
@@ -140,11 +159,12 @@ export class RouteBuilder<
       BodySchema,
       QuerySchema,
       CookiesSchema,
+      TParams,
       TData
     >
   }
 
-  private applyRoute(method: HttpMethod, handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  private applyRoute(method: HttpMethod, handler: RouteHandler<Schema>) {
     this.router[method](this.path, (req, res) => {
       const error = (error: Error) => {
         res.status(error.code).json(error)
@@ -154,6 +174,16 @@ export class RouteBuilder<
         body: null,
         query: null,
         cookies: null,
+        params: null,
+      }
+
+      if(this.paramSchema) {
+        const params = this.paramSchema.safeParse(req.params)
+        if (!params.success)
+          return res
+            .status(400)
+            .json({ ...Error.BAD_REQUEST, cause: params.error.flatten() })
+        data.params = params.data
       }
 
       if (this.bodySchema) {
@@ -166,7 +196,6 @@ export class RouteBuilder<
       }
 
       if (this.querySchema) {
-        console.log(req)
         const queryParams = this.querySchema.safeParse(req.query)
         if (!queryParams.success)
           return res
@@ -195,39 +224,39 @@ export class RouteBuilder<
 
       // TODO: Add error handling
       // TODO: Turn return type into a response object
-      handler({ ...data, req, res, data: middlewareData as TData, error, params: req.params as unknown as ExtractUrlParams<Path> })
+      handler({ ...data, req, res, data: middlewareData as TData, error })
     })
   }
 
-  all(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  all(handler: RouteHandler<Schema>) {
     this.applyRoute("all", handler)
   }
 
-  get(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  get(handler: RouteHandler<Schema>) {
     this.applyRoute("get", handler)
   }
 
-  post(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  post(handler: RouteHandler<Schema>) {
     this.applyRoute("post", handler)
   }
 
-  put(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  put(handler: RouteHandler<Schema>) {
     this.applyRoute("put", handler)
   }
 
-  delete(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  delete(handler: RouteHandler<Schema>) {
     this.applyRoute("delete", handler)
   }
 
-  patch(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  patch(handler: RouteHandler<Schema>) {
     this.applyRoute("patch", handler)
   }
 
-  options(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  options(handler: RouteHandler<Schema>) {
     this.applyRoute("options", handler)
   }
 
-  head(handler: RouteHandler<Schema, TData, ExtractUrlParams<Path>>) {
+  head(handler: RouteHandler<Schema>) {
     this.applyRoute("head", handler)
   }
 }
