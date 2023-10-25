@@ -1,17 +1,21 @@
 import { auth, getProvider } from "@/shared/lucia"
 import { OAuthRequestError } from "@lucia-auth/oauth"
 import { createRouter } from "@/shared/util/route-builder"
-import z from "zod"
-import { providerSchema } from "./login.types"
+import { callbackQuerySchema, providerSchema } from "./auth.types"
 
-const loginRouter = createRouter()
+const oauthRouter = createRouter()
 
-loginRouter
-  .path("/:provider")
-  .params({
-    provider: providerSchema,
-  })
-  .get(async ({ res, params }) => {
+oauthRouter
+  .path("/login/:provider")
+  .params({ provider: providerSchema })
+  .get(async ({ req, res, params }) => {
+    const authRequest = auth.handleRequest(req, res)
+    const session = await authRequest.validate()
+
+    if (session) {
+      return res.redirect("/")
+    }
+
     const provider = getProvider(params.provider)
     const [url, state] = await provider.getAuthorizationUrl()
 
@@ -24,28 +28,14 @@ loginRouter
     res.redirect(url.toString())
   })
 
-  loginRouter
-  .path("/:provider/callback")
-  .params({
-    provider: z.enum(["github", "discord"], { description: "OAuth provider" }),
-  })
-  .query(
-    z.union([
-      z.object({
-        state: z.string(),
-        code: z.string(),
-      }),
-      z.object({
-        error: z.string(),
-      }),
-    ])
-  )
+oauthRouter
+  .path("/callback/:provider")
+  .params({ provider: providerSchema })
+  .query(callbackQuerySchema)
   .get(async ({ req, res, query, params }) => {
     if ("error" in query) {
       return res.redirect("/login")
     }
-    console.log("cookies", req.cookies, query.state)
-
     const storedState = req.cookies[`${params.provider}-oauth-state`]
     const provider = getProvider(params.provider)
 
@@ -55,7 +45,6 @@ loginRouter
       storedState !== query.state ||
       typeof query.code !== "string"
     ) {
-      console.log(storedState, query.state, query.code, typeof query.code)
       return res.redirect("/login?error=" + encodeURIComponent("Invalid state"))
     }
     try {
@@ -79,6 +68,9 @@ loginRouter
       const authRequest = auth.handleRequest(req, res)
       authRequest.setSession(session)
 
+      // do some cleanup
+      await auth.deleteDeadUserSessions(session.userId)
+
       if (import.meta.env.PROD) {
         res.redirect("/")
       } else {
@@ -95,4 +87,20 @@ loginRouter
     }
   })
 
-export default loginRouter
+oauthRouter.path("/logout").get(async ({ req, res }) => {
+  const authRequest = auth.handleRequest(req, res)
+  const session = await authRequest.validate()
+
+  if (!session) {
+    return res.sendStatus(401)
+  }
+
+  await auth.invalidateSession(session.sessionId)
+  authRequest.setSession(null)
+
+  await auth.deleteDeadUserSessions(session.userId)
+
+  return res.redirect("/login")
+})
+
+export default oauthRouter

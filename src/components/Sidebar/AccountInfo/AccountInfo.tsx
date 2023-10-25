@@ -1,26 +1,30 @@
+import { User } from "@server/shared/models/session.model"
 import c from "./AccountInfo.module.scss"
 
+interface AccountInfoProps {
+  user: User
+}
 
-const AccountInfo = () => {
-  const user = {
-    name: "John Doe",
-    email: "test@test.de",
-    profilePicture: null//"https://i.pravatar.cc/150?img=7"
-  }
-
+const AccountInfo = ({ user }: AccountInfoProps) => {
   return (
     <div className={c.info}>
-      {user.profilePicture ? (
-        <img className={c.profilePicture} src={user.profilePicture} alt="Profile" />
+      {user ? (
+        <>
+          {user.avatar ? (
+            <img className={c.profilePicture} src={user.avatar} alt="Profile" />
+          ) : (
+            <div className={c.profilePictureReplacement}>
+              {user.name[0]}
+            </div>
+          )}
+          <div className={c.text}>
+            <p className={c.name}>{user.name}</p>
+            <p className={c.email}>{user.email}</p>
+          </div>
+        </>
       ) : (
-        <div className={c.profilePictureReplacement}>
-          {user.name[0]}
-        </div>
+        <div className={c.loading}>Loading...</div>
       )}
-      <div className={c.text}>
-        <p className={c.name}>{user.name}</p>
-        <p className={c.email}>{user.email}</p>
-      </div>
     </div>
   )
 }

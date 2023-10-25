@@ -12,7 +12,7 @@ export function provider<P extends OAuth2ProviderAuth, Config extends object>(
   config: Config,
   getUser: (
     data: Awaited<ReturnType<P["validateCallback"]>>
-  ) => Parameters<Auth["createUser"]>[0]["attributes"]
+  ) => Lucia.DatabaseUserAttributes
 ) {
   const prv = provider(auth, config)
   return {

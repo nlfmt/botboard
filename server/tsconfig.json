@@ -8,7 +8,7 @@
         "module": "ESNext",
         "moduleResolution": "Bundler",
         "target": "ESNext",
-        "isolatedModules": false,
+        "isolatedModules": true,
         "esModuleInterop": true,
         "paths": {
             "@/*": ["./*"],

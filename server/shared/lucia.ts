@@ -6,11 +6,19 @@ import { express } from "lucia/middleware"
 import { github, discord } from "@lucia-auth/oauth/providers"
 import { prisma as prismaAdapter } from "@lucia-auth/adapter-prisma"
 import { provider } from "./util/auth-provider"
+import { User as PrismaUser } from "@prisma/client"
 
 /** The OAuth redirect URI */
 export const REDIRECT_URI = import.meta.env.PROD
   ? env.REDIRECT_URI
   : "http://localhost:3000"
+
+export type DatabaseUserAttributes = {
+  name: string
+  email: string | null
+  avatar: string | null
+}
+export type DatabaseSessionAttributes = Record<string, never>
 
 /**
  * The Lucia authentication instance.
@@ -19,15 +27,14 @@ export const auth = lucia({
   env: import.meta.env.PROD ? "PROD" : "DEV",
   middleware: express(),
   adapter: prismaAdapter(prisma),
-
-  getUserAttributes: (data) => {
+  getUserAttributes: (data: PrismaUser): DatabaseUserAttributes => {
     return {
-      id: data.id,
       name: data.name,
       email: data.email,
       avatar: data.avatar,
     }
   },
+  getSessionAttributes: (): DatabaseSessionAttributes => ({}),
 })
 
 /**
@@ -41,10 +48,10 @@ export const providers = {
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     },
-    ({ githubUser }) => ({
-      avatar: githubUser.avatar_url,
+    ({ githubUser }): DatabaseUserAttributes => ({
       name: githubUser.login,
-      email: githubUser.email ?? undefined,
+      email: githubUser.email,
+      avatar: githubUser.avatar_url,
     })
   ),
   discord: provider(
@@ -53,12 +60,12 @@ export const providers = {
     {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
-      redirectUri: new URL("/api/login/discord/callback", REDIRECT_URI).href,
+      redirectUri: new URL("/api/auth/callback/discord", REDIRECT_URI).href,
     },
-    ({ discordUser }) => ({
-      avatar: discordUser.avatar,
+    ({ discordUser }): DatabaseUserAttributes => ({
       name: discordUser.username,
-      email: discordUser.email,
+      email: discordUser.email ?? null,
+      avatar: `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}?size=480`,
     })
   ),
 } as const

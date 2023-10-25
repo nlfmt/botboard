@@ -1,27 +1,33 @@
-# React + TypeScript + Vite
+# BotBoard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web application for managing various applications.
 
-Currently, two official plugins are available:
+## Technologies
+- (React)[https://react.dev/]
+- (SCSS)[https://sass-lang.com/]
+- (Express)[https://expressjs.com/]
+- (Prisma)[https://www.prisma.io/]
+- (tRPC)[https://trpc.io/]
+- (Lucia)[https://lucia-auth.com/]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
+Running the application locally requires a few steps.
+```bash
+# Install dependencies
+pnpm i
 
-## Expanding the ESLint configuration
+# Push the database schema to the database
+pnpm db:push
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
+# Start the development server
+pnpm dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+To build and run the production app:
+```bash
+# Build the app
+pnpm build
+
+# Start the production server
+pnpm start
+```

@@ -1,11 +1,9 @@
 import {
-  AttachMoneyRounded,
   GridViewRounded,
   LineAxisRounded,
   LogoutRounded,
   NotesRounded,
   PodcastsRounded,
-  QuestionMarkRounded,
   SettingsRounded,
 } from "@mui/icons-material"
 import c from "./Sidebar.module.scss"
@@ -13,8 +11,12 @@ import SidebarLink from "@/components/Sidebar/SidebarLink/SidebarLink"
 import SidebarHeader from "@/components/Sidebar/SidebarHeader/SidebarHeader"
 import Heading from "@/components/Heading/Heading"
 import AccountInfo from "@/components/Sidebar/AccountInfo/AccountInfo"
+import useUser from "@/hooks/useUser"
+import { signOut } from "@/util/auth"
 
 const Sidebar = () => {
+  const { user } = useUser()
+
   return (
     <div className={c.sidebar}>
       <SidebarHeader />
@@ -42,7 +44,12 @@ const Sidebar = () => {
 
       <section className={c.account}>
         <Heading>Account</Heading>
-        <AccountInfo />
+        {user && (
+          <>
+            <AccountInfo user={user} />
+            <SidebarLink name="Logout" type="danger" onClick={signOut} icon={<LogoutRounded />} />
+          </>
+        )}
       </section>
       <footer>
         <p>

@@ -2,9 +2,8 @@ import { TRPCError, initTRPC } from "@trpc/server"
 import prisma from "./prisma"
 import { Request, Response } from "express"
 import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http"
-import { verifyToken } from "./util/tokens"
-import { TokenData } from "./models/token.model"
 import { auth } from "./lucia"
+import { User } from "./models/session.model"
 
 export async function createTRPCContext({
   req,
@@ -32,7 +31,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       ...ctx,
-      user: session.user,
+      user: session.user as User,
     },
   })
 })
