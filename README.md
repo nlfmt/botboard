@@ -3,12 +3,12 @@
 Web application for managing various applications.
 
 ## Technologies
-- (React)[https://react.dev/]
-- (SCSS)[https://sass-lang.com/]
-- (Express)[https://expressjs.com/]
-- (Prisma)[https://www.prisma.io/]
-- (tRPC)[https://trpc.io/]
-- (Lucia)[https://lucia-auth.com/]
+- [React](https://react.dev/)
+- [SCSS](https://sass-lang.com/)
+- [Express](https://expressjs.com/)
+- [Prisma](https://www.prisma.io/)
+- [tRPC](https://trpc.io/)
+- [Lucia](https://lucia-auth.com/)
 
 ## Getting Started
 Running the application locally requires a few steps. \
