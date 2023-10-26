@@ -13,13 +13,6 @@ export const REDIRECT_URI = import.meta.env.PROD
   ? env.REDIRECT_URI
   : "http://localhost:3000"
 
-export type DatabaseUserAttributes = {
-  name: string
-  email: string | null
-  avatar: string | null
-}
-export type DatabaseSessionAttributes = Record<string, never>
-
 /**
  * The Lucia authentication instance.
  */
@@ -27,14 +20,14 @@ export const auth = lucia({
   env: import.meta.env.PROD ? "PROD" : "DEV",
   middleware: express(),
   adapter: prismaAdapter(prisma),
-  getUserAttributes: (data: PrismaUser): DatabaseUserAttributes => {
+  getUserAttributes: (data: PrismaUser): Lucia.DatabaseUserAttributes => {
     return {
       name: data.name,
       email: data.email,
       avatar: data.avatar,
     }
   },
-  getSessionAttributes: (): DatabaseSessionAttributes => ({}),
+  getSessionAttributes: (): Lucia.DatabaseSessionAttributes => ({}),
 })
 
 /**
@@ -48,7 +41,7 @@ export const providers = {
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     },
-    ({ githubUser }): DatabaseUserAttributes => ({
+    ({ githubUser }): Lucia.DatabaseUserAttributes => ({
       name: githubUser.login,
       email: githubUser.email,
       avatar: githubUser.avatar_url,
@@ -62,7 +55,7 @@ export const providers = {
       clientSecret: env.DISCORD_CLIENT_SECRET,
       redirectUri: new URL("/api/auth/callback/discord", REDIRECT_URI).href,
     },
-    ({ discordUser }): DatabaseUserAttributes => ({
+    ({ discordUser }): Lucia.DatabaseUserAttributes => ({
       name: discordUser.username,
       email: discordUser.email ?? null,
       avatar: `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}?size=480`,

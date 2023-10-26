@@ -27,7 +27,7 @@
       "@server/*": ["../server/*"],
     },
   },
-  "include": ["**/*", "../server/types/lucia.d.ts"],
+  "include": ["**/*", "../types/**/*"],
   "references": [
     { "path": "../server" },
   ]
