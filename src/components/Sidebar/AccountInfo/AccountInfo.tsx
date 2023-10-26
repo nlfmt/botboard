@@ -1,4 +1,4 @@
-import { User } from "@server/shared/models/session.model"
+import { User } from "lucia"
 import c from "./AccountInfo.module.scss"
 
 interface AccountInfoProps {

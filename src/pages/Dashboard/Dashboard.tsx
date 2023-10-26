@@ -4,14 +4,10 @@ import Text from "@/components/Text/Text"
 import c from "./Dashboard.module.scss"
 import Heading from "@/components/Heading/Heading"
 import Divider from "@/components/Divider/Divider"
-import { ArrowRight, ArrowRightRounded, GitHub } from "@mui/icons-material"
-import Discord from "@/assets/discord.svg" 
-import Button from "@/components/Button/Button"
-import { useNavigate } from "react-router-dom"
+import { ArrowRightRounded } from "@mui/icons-material"
 import api from "@/util/api"
 
 const Dashboard = () => {
-  const navigate = useNavigate()
   const { data: message, isError } = api.test.abc.useQuery()
 
   return (

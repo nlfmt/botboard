@@ -27,7 +27,7 @@
       "@server/*": ["../server/*"],
     },
   },
-  "include": ["**/*", "../vite-env.d.ts"],
+  "include": ["**/*", "../server/types/lucia.d.ts"],
   "references": [
     { "path": "../server" },
   ]

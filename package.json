@@ -11,7 +11,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db": "prisma studio"
   },
   "dependencies": {
     "@lucia-auth/adapter-prisma": "^3.0.2",

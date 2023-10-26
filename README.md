@@ -11,7 +11,9 @@ Web application for managing various applications.
 - (Lucia)[https://lucia-auth.com/]
 
 ## Getting Started
-Running the application locally requires a few steps.
+Running the application locally requires a few steps. \
+First, add all environment variables needed by copying the `.env.example` file to `.env` and filling in the values. \
+Then, install the dependencies and push the database schema and run the development server:
 ```bash
 # Install dependencies
 pnpm i
