@@ -6,10 +6,10 @@ import { Auth } from "lucia"
  * @param provider the provider to use
  * @param getUser the transformation function to create a db user from the provider user
  */
-export function provider<P extends OAuth2ProviderAuth, Config extends object>(
+export function provider<C extends object, P extends OAuth2ProviderAuth>(
   auth: Auth,
-  provider: (auth: Auth, config: Config) => P,
-  config: Config,
+  provider: (auth: Auth, config: C) => P,
+  config: C,
   getUser: (
     data: Awaited<ReturnType<P["validateCallback"]>>
   ) => Lucia.DatabaseUserAttributes

@@ -38,7 +38,11 @@ app.use("/api/trpc", trpcRouter)
 app.use("/api", apiRouter)
 
 app.get("*", (req, res) => {
-  res.sendFile(relativePath("index.html"))
+  if (import.meta.env.PROD) {
+    res.sendFile(relativePath("index.html"))
+  } else {
+    res.redirect("http://localhost:3000")
+  }
 })
 
 

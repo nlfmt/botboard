@@ -2,7 +2,7 @@ import { classes } from "@/util/util"
 import c from "./Title.module.scss"
 
 export interface TitleProps {
-  children: string
+  children: React.ReactNode
   className?: string
 }
 

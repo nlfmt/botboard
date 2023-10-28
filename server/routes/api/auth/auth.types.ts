@@ -18,5 +18,6 @@ export const callbackQuerySchema = z.union([
   }),
   z.object({
     error: z.string(),
+    error_description: z.string().optional(),
   }),
 ])

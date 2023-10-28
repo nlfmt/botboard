@@ -16,10 +16,6 @@ export const router = createBrowserRouter([
         Component: Dashboard,
       },
       {
-        path: "login",
-        Component: Login,
-      },
-      {
         path: "logs",
         Component: Dashboard,
       },
@@ -48,6 +44,10 @@ export const router = createBrowserRouter([
         Component: Dashboard,
       },
     ]
+  },
+  {
+    path: "login",
+    Component: Login,
   },
   {
     path: "*",

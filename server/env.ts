@@ -13,6 +13,8 @@ export const envModel = z.object({
   GITHUB_CLIENT_SECRET: z.string().min(1),
   DISCORD_CLIENT_ID: z.string().min(1),
   DISCORD_CLIENT_SECRET: z.string().min(1),
+  TWITCH_CLIENT_ID: z.string().min(1),
+  TWITCH_CLIENT_SECRET: z.string().min(1),
 })
 
 /**

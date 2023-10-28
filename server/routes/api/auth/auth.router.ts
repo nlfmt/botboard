@@ -34,7 +34,11 @@ oauthRouter
   .query(callbackQuerySchema)
   .get(async ({ req, res, query, params }) => {
     if ("error" in query) {
-      return res.redirect("/login")
+      const params = new URLSearchParams({
+        error: query.error,
+        error_description: query.error_description ?? "",
+      })
+      return res.redirect("/login?" + params)
     }
     const storedState = req.cookies[`${params.provider}-oauth-state`]
     const provider = getProvider(params.provider)
@@ -71,18 +75,11 @@ oauthRouter
       // do some cleanup
       await auth.deleteDeadUserSessions(session.userId)
 
-      if (import.meta.env.PROD) {
-        res.redirect("/")
-      } else {
-        res.redirect("http://localhost:3000")
-      }
+      res.redirect("/")
     } catch (e) {
       if (e instanceof OAuthRequestError) {
-        // invalid code
-        console.log("error", e)
         return res.sendStatus(400)
       }
-      console.log("error", e)
       return res.sendStatus(500)
     }
   })

@@ -3,7 +3,7 @@ import env from "@/env"
 import prisma from "./prisma"
 import { lucia } from "lucia"
 import { express } from "lucia/middleware"
-import { github, discord } from "@lucia-auth/oauth/providers"
+import { github, discord, twitch } from "@lucia-auth/oauth/providers"
 import { prisma as prismaAdapter } from "@lucia-auth/adapter-prisma"
 import { provider } from "./util/auth-provider"
 import { User as PrismaUser } from "@prisma/client"
@@ -55,10 +55,29 @@ export const providers = {
       clientSecret: env.DISCORD_CLIENT_SECRET,
       redirectUri: new URL("/api/auth/callback/discord", REDIRECT_URI).href,
     },
-    ({ discordUser }): Lucia.DatabaseUserAttributes => ({
-      name: discordUser.username,
-      email: discordUser.email ?? null,
-      avatar: `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}?size=480`,
+    ({ discordUser }): Lucia.DatabaseUserAttributes => {
+      console.log(discordUser)
+      return {
+        name: discordUser.username,
+        email: discordUser.email ?? null,
+        avatar:
+          discordUser.avatar &&
+          `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}?size=480`,
+      }
+    }
+  ),
+  twitch: provider(
+    auth,
+    twitch,
+    {
+      clientId: env.TWITCH_CLIENT_ID,
+      clientSecret: env.TWITCH_CLIENT_SECRET,
+      redirectUri: new URL("/api/auth/callback/twitch", REDIRECT_URI).href,
+    },
+    ({ twitchUser }): Lucia.DatabaseUserAttributes => ({
+      name: twitchUser.login,
+      email: twitchUser.email ?? null,
+      avatar: twitchUser.profile_image_url,
     })
   ),
 } as const
