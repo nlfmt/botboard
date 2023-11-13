@@ -56,7 +56,6 @@ export const providers = {
       redirectUri: new URL("/api/auth/callback/discord", REDIRECT_URI).href,
     },
     ({ discordUser }): Lucia.DatabaseUserAttributes => {
-      console.log(discordUser)
       return {
         name: discordUser.username,
         email: discordUser.email ?? null,

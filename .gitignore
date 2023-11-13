@@ -26,6 +26,7 @@ dist-ssr
 
 # Credentials
 .env
+.env.dev
 certs
 *.pem
 

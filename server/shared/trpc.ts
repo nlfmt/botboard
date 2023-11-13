@@ -17,11 +17,8 @@ export async function createTRPCContext({
 const t = initTRPC.context<typeof createTRPCContext>().create()
 
 const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-  console.log("enforceUserIsAuthed", ctx.req.headers)
   const authRequest = auth.handleRequest(ctx.req, ctx.res)
   const session = await authRequest.validate()
-
-  console.log({ session })
 
   if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED" })

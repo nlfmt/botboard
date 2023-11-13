@@ -37,9 +37,8 @@ model Key {
 }
 
 model Bot {
-    id            String    @id @default(uuid())
+    id            String    @id @default(cuid())
     name          String
-    clientId      String
     clientSecret  String
     totalLogs     Int       @default(0)
     totalCommands Int       @default(0)

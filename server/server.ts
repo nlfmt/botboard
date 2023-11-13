@@ -10,12 +10,14 @@ import apiRouter from "@/routes/api/root"
 import { trpcRouter } from "@/routes/trpc/root"
 import { initEnv } from "@/shared/util/init-env"
 import { fileURLToPath } from "url"
+import { csp } from "./shared/util/csp"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const relativePath = (...paths: string[]) =>
   path.join(path.dirname(fileURLToPath(import.meta.url)), ...paths)
 
-initEnv(relativePath("../.env"))
+initEnv(relativePath(
+  import.meta.env.PROD ? "../.env" : "../.env.dev"
+))
 
 
 const cert = "../certs/cert.pem"
@@ -33,11 +35,13 @@ app.use(express.urlencoded({ extended: true }))
 
 
 app.use("/static", express.static(relativePath("static")))
+app.use("/static/manifest.json", express.static(relativePath("manifest.json")))
+app.use("/static/registerSW.js", express.static(relativePath("registerSW.js")))
 
 app.use("/api/trpc", trpcRouter)
 app.use("/api", apiRouter)
 
-app.get("*", (req, res) => {
+app.get("*", csp, (req, res) => {
   if (import.meta.env.PROD) {
     res.sendFile(relativePath("index.html"))
   } else {
@@ -46,18 +50,25 @@ app.get("*", (req, res) => {
 })
 
 
-const server = https.createServer(
-  {
-    cert: readFileSync(path.join(__dirname, cert)),
-    key: readFileSync(path.join(__dirname, key)),
-  },
-  app
-)
-
 if (import.meta.env.PROD) {
-  server.listen(PORT, () => {
-    console.log(`\n\x1b[1;94mBotBoard Backend running on port ${PORT}\x1b[0m\n`)
-  })
+  try {
+    const server = https.createServer(
+      {
+        cert: readFileSync(relativePath(cert)),
+        key: readFileSync(relativePath(key)),
+      },
+      app
+    )
+    server.listen(PORT, () => {
+      console.log(`\n\x1b[1;94mBotBoard Backend running on port ${PORT}\x1b[0m\n`)
+    })
+  } catch (err) {
+    if ((err as { code: string }).code === "ENOENT") {
+      console.error(
+        "\x1b[1;91mERROR: Certificate or key not found.\x1b[0m\n"
+      )
+    }
+  }
 }
 
 export const viteNodeApp: express.Express = app

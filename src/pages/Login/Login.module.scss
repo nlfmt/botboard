@@ -31,5 +31,25 @@
       flex-direction: column;
       gap: var(--spacing-m);
     }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-m);
+      margin: var(--spacing-m) 0;
+      color: var(--divider);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1rem;
+      font-size: 0.8rem;
+
+      &::before,
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: var(--divider);
+      }
+    }
   }
 }

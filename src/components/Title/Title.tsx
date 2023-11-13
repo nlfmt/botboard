@@ -4,11 +4,20 @@ import c from "./Title.module.scss"
 export interface TitleProps {
   children: React.ReactNode
   className?: string
+  align?: "left" | "center" | "right"
 }
 
 const Title = (props: TitleProps) => {
   return (
-    <h2 className={classes(c.title, props.className)}>{props.children}</h2>
+    <h2
+      className={classes(
+        c.title,
+        props.className
+      )}
+      style={{ textAlign: props.align }}
+    >
+      {props.children}
+    </h2>
   )
 }
 

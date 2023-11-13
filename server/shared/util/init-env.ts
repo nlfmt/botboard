@@ -12,9 +12,18 @@ export function onInvalidEnv(err: ZodError) {
 }
 
 export function initEnv(path: string) {
-  dotenv.config({
+  const res = dotenv.config({
     path,
   })
+  if (res.parsed) {
+    process.env = { ...process.env, ...res.parsed }
+  } else {
+    console.error("\n❌ Invalid environment variables:")
+    console.error(` - ${res.error}`)
+    console.error("\n")
+    process.exit(1)
+  }
+  console.log(path, process.env.GITHUB_CLIENT_ID)
   const result = envModel.safeParse(process.env)
   if (!result.success) onInvalidEnv(result.error)
 }

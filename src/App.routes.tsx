@@ -4,6 +4,7 @@ import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import SidebarPage from "@/components/Sidebar/SidebarPage";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Login from "./pages/Login/Login";
+import Applications from "./pages/Applications/Applications";
 
 
 export const router = createBrowserRouter([
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "applications",
-        Component: Dashboard,
+        Component: Applications,
       },
       {
         path: "docs",

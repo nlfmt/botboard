@@ -7,7 +7,6 @@ const alias = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 // https://vitejs.dev/config/
 export default defineConfig({
   root: "./",
-
   build: {
     outDir: "./build",
     emptyOutDir: true,

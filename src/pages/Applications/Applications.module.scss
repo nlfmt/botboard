@@ -1,0 +1,16 @@
+.applications {
+  max-width: var(--max-content);
+  width: 100%;
+  padding: var(--spacing-l);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+
+  .actionBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-m);
+  }
+}

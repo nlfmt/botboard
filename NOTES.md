@@ -1,4 +1,5 @@
 # Ideas
+- Limit active session count to 4?
 - load discord user info from api to show profile picture & info in ui
 - add rate limiter (express-rate-limit)[https://www.npmjs.com/package/express-rate-limit]
 - implement CSRF protection

@@ -1,9 +1,9 @@
 import c from "./Button.module.scss"
 
 export interface ButtonProps {
-    children: string
-    icon: React.ReactNode
-    onClick: () => void
+    children?: string
+    icon?: React.ReactNode
+    onClick?: () => void
 }
 
 const Button = (props: ButtonProps) => {
