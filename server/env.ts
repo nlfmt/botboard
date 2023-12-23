@@ -1,4 +1,6 @@
 import z from "zod"
+import { initEnv } from "./shared/util/init-env"
+import { relativePath } from "./shared/util/path"
 
 /**
  * The environment variables that are required for the server to run.
@@ -17,7 +19,10 @@ export const envModel = z.object({
   TWITCH_CLIENT_SECRET: z.string().min(1),
 })
 
+const env = initEnv(envModel, relativePath(
+  import.meta.env.PROD ? "../.env" : "../.env.dev"
+))
 /**
  * All defined Environment Variables
  */
-export default process.env as z.infer<typeof envModel>
+export default env

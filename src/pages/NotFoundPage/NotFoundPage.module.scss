@@ -1,3 +1,5 @@
+@use "@/styles/mixins.scss" as mixins;
+
 .page {
   display: flex;
   justify-content: center;
@@ -40,7 +42,7 @@
         text-decoration: underline;
         filter: drop-shadow(0 0 15px rgba(var(--secondary-light-), 0.5));
 
-        &:hover {
+        @include mixins.hover {
           color: var(--secondary-light);
         }
       }

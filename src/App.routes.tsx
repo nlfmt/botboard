@@ -4,7 +4,7 @@ import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import SidebarPage from "@/components/Sidebar/SidebarPage";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Login from "./pages/Login/Login";
-import Applications from "./pages/Applications/Applications";
+import { ApplicationRoutes } from "./pages/Applications/Application.routes";
 
 
 export const router = createBrowserRouter([
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "applications",
-        Component: Applications,
+        children: ApplicationRoutes
       },
       {
         path: "docs",

@@ -3,9 +3,9 @@ import { OAuthRequestError } from "@lucia-auth/oauth"
 import { createRouter } from "@/shared/util/route-builder"
 import { callbackQuerySchema, providerSchema } from "./auth.types"
 
-const oauthRouter = createRouter()
+const authRouter = createRouter()
 
-oauthRouter
+authRouter
   .path("/login/:provider")
   .params({ provider: providerSchema })
   .get(async ({ req, res, params }) => {
@@ -28,7 +28,7 @@ oauthRouter
     res.redirect(url.toString())
   })
 
-oauthRouter
+authRouter
   .path("/callback/:provider")
   .params({ provider: providerSchema })
   .query(callbackQuerySchema)
@@ -84,7 +84,7 @@ oauthRouter
     }
   })
 
-oauthRouter.path("/logout").get(async ({ req, res }) => {
+authRouter.path("/logout").get(async ({ req, res }) => {
   const authRequest = auth.handleRequest(req, res)
   const session = await authRequest.validate()
 
@@ -100,4 +100,4 @@ oauthRouter.path("/logout").get(async ({ req, res }) => {
   return res.redirect("/login")
 })
 
-export default oauthRouter
+export default authRouter

@@ -1,4 +1,3 @@
-import "lucia/polyfill/node"
 import env from "@/env"
 import prisma from "./prisma"
 import { lucia } from "lucia"

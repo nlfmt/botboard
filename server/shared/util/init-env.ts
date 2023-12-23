@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
-import { envModel } from "@/env"
+import { z } from "zod"
 
-export function initEnv(path: string) {
+export function initEnv<T extends z.ZodSchema>(envModel: T, path: string): z.infer<T> {
   const res = dotenv.config({
     path,
   })
@@ -11,7 +11,7 @@ export function initEnv(path: string) {
   }
 
   if (res.error) {
-    console.error("\n❌ Invalid environment variables:")
+    console.error("\n❌ Invalid environment file:")
     console.error(` - ${res.error}`)
     console.error("\n")
     process.exit(1)
@@ -27,4 +27,6 @@ export function initEnv(path: string) {
     console.error("\n")
     process.exit(1)
   }
+
+  return result.data
 }

@@ -1,3 +1,5 @@
+@use "@/styles/mixins.scss" as mixins;
+
 .link {
   display: flex;
   align-items: center;
@@ -36,12 +38,14 @@
     filter: blur(15px);
   }
 
-  &:not([data-active="true"]):hover {
-    color: var(--clr);
+  &:not([data-active="true"]) {
+    @include mixins.hover {
+      color: var(--clr);
 
-    &::before {
-      opacity: 0.3;
-      animation: pulse 1s infinite ease-in-out;
+      &::before {
+        opacity: 0.3;
+        animation: pulse 1s infinite ease-in-out;
+      }
     }
   }
 

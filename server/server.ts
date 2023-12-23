@@ -1,23 +1,14 @@
-import path from "path"
 import cors from "cors"
 import https from "https"
 import morgan from "morgan"
 import helmet from "helmet"
 import express from "express"
 import { readFileSync } from "fs"
+import { csp } from "./shared/util/csp"
 import cookieParser from "cookie-parser"
 import apiRouter from "@/routes/api/root"
 import { trpcRouter } from "@/routes/trpc/root"
-import { initEnv } from "@/shared/util/init-env"
-import { fileURLToPath } from "url"
-import { csp } from "./shared/util/csp"
-
-const relativePath = (...paths: string[]) =>
-  path.join(path.dirname(fileURLToPath(import.meta.url)), ...paths)
-
-initEnv(relativePath(
-  import.meta.env.PROD ? "../.env" : "../.env.dev"
-))
+import { relativePath } from "./shared/util/path"
 
 
 const cert = "../certs/cert.pem"

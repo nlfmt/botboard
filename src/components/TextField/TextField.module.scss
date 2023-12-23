@@ -1,0 +1,34 @@
+.textField {
+  background-color: var(--bg1);
+  border-radius: var(--radius-s);
+  border: none;
+  border: 1px solid var(--divider);
+  
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-s) var(--spacing-s);
+
+  &:focus-within {
+    border: 1px solid var(--primary);
+  }
+  
+  
+  .input {
+    background: none;
+    border: none;
+    outline: none;
+    
+    color: var(--text);
+    font-weight: normal;
+    font-size: 0.9rem;
+    letter-spacing: 0.05rem;
+    min-width: auto;
+  }
+
+  svg {
+    width: 18px;
+    & * { fill: currentColor; }
+  }
+}

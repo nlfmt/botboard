@@ -1,3 +1,5 @@
+@use "@/styles/mixins.scss" as mixins;
+
 .button {
   background-color: var(--bg1);
   color: var(--text);
@@ -6,10 +8,10 @@
   border: 1px solid var(--divider);
 
   display: flex;
-  gap: var(--spacing-m);
+  gap: var(--spacing-s);
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-m);
+  padding: var(--spacing-s) var(--spacing-m);
 
   font-weight: normal;
   font-size: 0.9rem;
@@ -29,16 +31,45 @@
               box-shadow 100ms ease-in-out;
   
   svg {
-    width: 20px;
+    width: 18px;
     & * { fill: currentColor; }
   }
 
-  &:hover {
+  --_color: var(--primary);
+  
+  @include mixins.hover {
     background-color: rgba(var(--primary-), 0.1);
     color: var(--primary);
     border-color: var(--primary);
     box-shadow: 0 0 var(--spacing-s) rgba(var(--primary-), 0.3),
-                0 0 var(--spacing-l) rgba(var(--primary-), 0.1),
-                0 0 var(--spacing-xxl) rgba(var(--primary-), 0.1);;
+    0 0 var(--spacing-l) rgba(var(--primary-), 0.1),
+    0 0 var(--spacing-xxl) rgba(var(--primary-), 0.1);;
+  }
+  
+  &[data-type=success] {
+    --_color: var(--secondary);
+    @include mixins.hover {
+      background-color: rgba(var(--secondary-), 0.1);
+      color: var(--secondary);
+      border-color: var(--secondary);
+      box-shadow: 0 0 var(--spacing-s) rgba(var(--secondary-), 0.3),
+      0 0 var(--spacing-l) rgba(var(--secondary-), 0.1),
+      0 0 var(--spacing-xxl) rgba(var(--secondary-), 0.1);;
+    }
+  }
+  &[data-type=danger] {
+    --_color: var(--danger);
+    @include mixins.hover {
+      background-color: rgba(var(--danger-), 0.1);
+      color: var(--danger);
+      border-color: var(--danger);
+      box-shadow: 0 0 var(--spacing-s) rgba(var(--danger-), 0.3),
+      0 0 var(--spacing-l) rgba(var(--danger-), 0.1),
+      0 0 var(--spacing-xxl) rgba(var(--danger-), 0.1);;
+    }
+  }
+
+  &:focus {
+    outline: 1px solid var(--_color);
   }
 }

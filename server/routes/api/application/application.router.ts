@@ -1,75 +1,70 @@
-// import scrypt from "@/shared/util/scrypt"
-// import { LoginRequestModel, SignupRequestModel } from "./auth.types"
-// import { createTokens } from "@/shared/util/tokens"
-// import { publicProcedure, createTRPCRouter } from "@/shared/trpc"
-// import { TRPCError } from "@trpc/server"
+import { createRouter } from "@/shared/util/route-builder";
+import { GetTokenModel } from "./application.types";
+import prisma from "@/shared/prisma";
+import { z } from "zod";
+import { createToken, verifyToken } from "@/shared/util/tokens";
+import env from "@/env";
 
-// export const authRouter = createTRPCRouter({
-//   signup: publicProcedure
-//     .input(SignupRequestModel)
-//     .mutation(async ({ ctx, input }) => {
-//       const { name, email, password } = input
+const applicationRouter = createRouter();
 
-//       const hash = scrypt.hashPassword(password)
-//       try {
-//         const user = await ctx.prisma.user.create({
-//           data: {
-//             name,
-//             email,
-//             password: hash,
-//           },
-//         })
+applicationRouter
+  .path("/:id/token")
+  .params({ id: z.string().nonempty() })
+  .body(GetTokenModel)
+  .post(async ({ res, body, params }) => {
+    const application = await prisma.application.findUnique({
+      where: {
+        id: params.id,
+      },
+    });
 
-//         const { accessToken, refreshToken } = createTokens({
-//           name: user.name,
-//           email: user.email,
-//         })
+    if (!application) {
+      return res.status(404).json({
+        error: "Application not found",
+      });
+    }
 
-//         return {
-//           accessToken,
-//           refreshToken,
-//           user: {
-//             name: user.name,
-//             email: user.email,
-//           },
-//         }
-//       } catch (error) {
-//         throw new TRPCError({
-//           code: "BAD_REQUEST",
-//           message: "User already exists",
-//         })
-//       }
-//     }),
+    if (application.clientSecret !== body.clientSecret) {
+      return res.status(401).json({
+        error: "Invalid client secret",
+      });
+    }
 
-//   login: publicProcedure
-//     .input(LoginRequestModel)
-//     .mutation(async ({ ctx, input }) => {
-//       const { name, password } = input
-//       const user = await ctx.prisma.user.findUnique({
-//         where: {
-//           name,
-//         },
-//       })
+    return res.json({
+      token: createToken(
+        {
+          appId: application.id,
+          name: application.name,
+        },
+        env.ACCESS_TOKEN_EXPIRES_IN
+      ),
+    })
+  })
 
-//       if (!user)
-//         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
+applicationRouter
+  .path("/")
+  .use(({ req }) => {
+    const authorization = req.headers.authorization;
+    if (!authorization) return null;
+    const [type, token] = authorization.split(" ");
+    if (type !== "Bearer") return null;
+    const tokenData = verifyToken(token);
+    if (!tokenData.success) return null;
+    return {
+      app: tokenData.data,
+    }
+  })
+  .get(async ({ res, data }) => { })
 
-//       if (!(await scrypt.verifyPassword(password, user.password))) {
-//         throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong Password" })
-//       }
 
-//       const { accessToken, refreshToken } = createTokens({
-//         name: user.name,
-//         email: user.email,
-//       })
-
-//       return {
-//         accessToken,
-//         refreshToken,
-//         user: {
-//           name: user.name,
-//           email: user.email,
-//         },
-//       }
-//     }),
-// })
+const abc = () => {
+    const authorization: string | undefined = "";//req.headers.authorization;
+    if (!authorization) return;
+    const [type, token] = authorization.split(" ");
+    if (type !== "Bearer") return;
+    const tokenData = verifyToken(token);
+    if (!tokenData.success) return;
+    return {
+      app: tokenData.data,
+    }
+  }

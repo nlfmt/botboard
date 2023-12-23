@@ -8,11 +8,11 @@ datasource db {
 }
 
 model User {
-    id           String    @id @unique
+    id           String        @id @unique
     name         String
     email        String?
     avatar       String?
-    Bot          Bot[]
+    apps         Application[]
     auth_session Session[]
     key          Key[]
 }
@@ -36,10 +36,10 @@ model Key {
     @@index([user_id])
 }
 
-model Bot {
+model Application {
     id            String    @id @default(cuid())
     name          String
-    clientSecret  String
+    clientSecret  String?
     totalLogs     Int       @default(0)
     totalCommands Int       @default(0)
     logs          Log[]
@@ -47,18 +47,24 @@ model Bot {
     connected     Boolean   @default(false)
     owner         User      @relation(fields: [ownerId], references: [id])
     ownerId       String
+
+    @@index([ownerId])
 }
 
 model Log {
-    id    String  @id @default(uuid())
-    bot   Bot?    @relation(fields: [botId], references: [id])
-    botId String?
+    id    String       @id @default(uuid())
+    app   Application? @relation(fields: [appId], references: [id])
+    appId String?
+
+    @@index([appId])
 }
 
 model Command {
-    id      String  @id @default(uuid())
+    id      String       @id @default(uuid())
     name    String
     options String
-    Bot     Bot?    @relation(fields: [botId], references: [id])
-    botId   String?
+    app     Application? @relation(fields: [appId], references: [id])
+    appId   String?
+
+    @@index([appId])
 }

@@ -5,20 +5,17 @@ import {
   TokenDataPayload,
   tokenDataModel,
 } from "../models/token.model"
+import { randomBytes } from "crypto";
 
 
 export type SafeError<T> =
   | { error: string; success: false }
   | { data: T; success: true }
 
-export function createTokens(payload: TokenDataPayload) {
-  const accessToken = jwt.sign(payload, env.AUTH_SECRET, {
-    expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
+export function createToken(payload: TokenDataPayload, expiresIn: string) {
+  return jwt.sign(payload, env.AUTH_SECRET, {
+    expiresIn,
   })
-  const refreshToken = jwt.sign(payload, env.AUTH_SECRET, {
-    expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
-  })
-  return { accessToken, refreshToken }
 }
 
 export function verifyToken(token: string): SafeError<TokenData> {
@@ -33,4 +30,8 @@ export function verifyToken(token: string): SafeError<TokenData> {
   } catch (e) {
     return { error: (e as JsonWebTokenError).message, success: false }
   }
+}
+
+export function createClientSecret() {
+  return randomBytes(48).toString("hex")
 }

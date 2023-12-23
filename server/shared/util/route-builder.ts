@@ -12,17 +12,22 @@ type HttpMethod =
   | "options"
   | "head"
 
+  type test = undefined extends (undefined | { app: number }) ? true : false
+  type c = VoidToNull<{ key2: string } | undefined>
+  type e = void extends undefined ? true : false
+  type abc = Combine<null, VoidToNull<{ key2: string } | undefined>>
+
 /** Combines two objects while ignoring null values */
 type Combine<
   T extends object | null,
-  U extends object | null
+  U extends object | null | undefined
 > = T extends object
   ? U extends object
     ? T & U
     : T
   : U extends object
-  ? U
-  : null
+    ? U
+    : null
 /** Extract Param Names from a route string */
 type ExtractUrlParamNames<T extends string> =
   T extends `${infer _}:${infer Param}/${infer Rest}`
@@ -31,12 +36,12 @@ type ExtractUrlParamNames<T extends string> =
     ? Param
     : never
 /** Get object of params from url string */
-type UrlParamSchema<Path extends string> = { [K in ExtractUrlParamNames<Path>]: z.ZodSchema }
+type UrlParamSchema<Path extends string> = { [K in ExtractUrlParamNames<Path>]: z.ZodSchema<string> }
 /** Replaces `void` with `null` */
 type VoidToNull<T> = T extends void ? null : T
 
-
 type RouteSchema = {
+  path: string
   body: z.ZodSchema
   query: z.ZodSchema
   cookies: z.ZodSchema
@@ -53,7 +58,11 @@ export type RouteHandler<Schema extends RouteSchema> = (v: {
   body: z.infer<Schema["body"]>
   query: z.infer<Schema["query"]>
   cookies: z.infer<Schema["cookies"]>
-  params: z.infer<Schema["params"]>
+  params: ExtractUrlParamNames<Schema["path"]> extends never
+    ? null
+    : Schema["params"] extends z.ZodSchema<null>
+      ? { [K in ExtractUrlParamNames<Schema["path"]>]: string }
+      : z.infer<Schema["params"]>
   data: Schema["data"]
   req: Request
   res: Response
@@ -61,7 +70,7 @@ export type RouteHandler<Schema extends RouteSchema> = (v: {
 }) => void
 
 /** A Middleware function */
-type Middleware<Data extends object | null = null, NewData extends object | void = object> = (args: {req: Request, res: Response, data: Data }) => NewData
+type Middleware<Data extends object | null = null, NewData extends object | null | void = object> = (args: {req: Request, res: Response, data: Data }) => NewData
 
 type ConstrainedSchema<Keys, Schema> = {
   [K in keyof Schema]: K extends Keys ? Schema[K] : never;
@@ -77,7 +86,7 @@ export class RouteBuilder<
   TCookies extends z.ZodSchema = z.ZodSchema<null>,
   TParams extends z.ZodSchema = z.ZodSchema<null>,
   TData extends object | null = null,
-  Schema extends RouteSchema = { body: TBody; query: TQuery; cookies: TCookies, params: TParams, data: TData }
+  Schema extends RouteSchema = { path: Path; body: TBody; query: TQuery; cookies: TCookies, params: TParams, data: TData }
 > {
   public router: Router
   private bodySchema?: TBody
@@ -96,7 +105,7 @@ export class RouteBuilder<
   }
 
   // TODO rewrite this to use return next({}) like trpc
-  use<NewData extends object | void>(middleware: Middleware<TData, NewData>) {
+  use<NewData extends object | null | void>(middleware: Middleware<TData, NewData>) {
     this.middleware.push(middleware as unknown as Middleware<object | null>)
     return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Combine<TData, VoidToNull<NewData>>>
   }
@@ -224,7 +233,16 @@ export class RouteBuilder<
 
       // TODO: Add error handling
       // TODO: Turn return type into a response object
-      handler({ ...data, req, res, data: middlewareData as TData, error })
+      handler({
+        body: data.body,
+        cookies: data.cookies,
+        query: data.query,
+        params: data.params as unknown as z.infer<Schema["params"]>,
+        req,
+        res,
+        data: middlewareData as TData,
+        error,
+      })
     })
   }
 

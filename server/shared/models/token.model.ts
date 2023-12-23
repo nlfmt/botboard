@@ -1,8 +1,8 @@
 import z from "zod"
 
 export const tokenDataModel = z.object({
+  appId: z.string(),
   name: z.string(),
-  email: z.string(),
   iat: z.number(),
   exp: z.number(),
 })

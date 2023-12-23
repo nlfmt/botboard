@@ -13,4 +13,9 @@
     align-items: center;
     gap: var(--spacing-m);
   }
+
+  .actionButtons {
+    display: flex;
+    gap: var(--spacing-m);
+  }
 }

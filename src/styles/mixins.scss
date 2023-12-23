@@ -18,6 +18,8 @@
 
 @mixin hover {
   @media (hover: hover) {
-    @content;
+    &:hover {
+      @content;
+    }
   }
 }
