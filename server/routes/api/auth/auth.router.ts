@@ -8,7 +8,7 @@ const authRouter = createRouter()
 authRouter
   .path("/login/:provider")
   .params({ provider: providerSchema })
-  .get(async ({ req, res, params }) => {
+  .get(async ({ ctx: { req, res }, params }) => {
     const authRequest = auth.handleRequest(req, res)
     const session = await authRequest.validate()
 
@@ -32,7 +32,7 @@ authRouter
   .path("/callback/:provider")
   .params({ provider: providerSchema })
   .query(callbackQuerySchema)
-  .get(async ({ req, res, query, params }) => {
+  .get(async ({ ctx: { req, res }, query, params }) => {
     if ("error" in query) {
       const params = new URLSearchParams({
         error: query.error,
@@ -84,7 +84,7 @@ authRouter
     }
   })
 
-authRouter.path("/logout").get(async ({ req, res }) => {
+authRouter.path("/logout").get(async ({ ctx: { req, res } }) => {
   const authRequest = auth.handleRequest(req, res)
   const session = await authRequest.validate()
 

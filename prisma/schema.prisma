@@ -39,7 +39,7 @@ model Key {
 model Application {
     id            String    @id @default(cuid())
     name          String
-    clientSecret  String?
+    clientSecret  String
     totalLogs     Int       @default(0)
     totalCommands Int       @default(0)
     logs          Log[]

@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express"
 import z from "zod"
-import { Error } from "./error"
+import { ApiError, Error } from "./error"
 
 type HttpMethod =
   | "all"
@@ -12,22 +12,12 @@ type HttpMethod =
   | "options"
   | "head"
 
-  type test = undefined extends (undefined | { app: number }) ? true : false
-  type c = VoidToNull<{ key2: string } | undefined>
-  type e = void extends undefined ? true : false
-  type abc = Combine<null, VoidToNull<{ key2: string } | undefined>>
+export type Overwrite<TType extends object, TWith> = undefined extends TWith
+  ? TType & Partial<NonNullable<TWith>>
+  : TType & NonNullable<TWith>
 
-/** Combines two objects while ignoring null values */
-type Combine<
-  T extends object | null,
-  U extends object | null | undefined
-> = T extends object
-  ? U extends object
-    ? T & U
-    : T
-  : U extends object
-    ? U
-    : null
+export type Flatten<T> = T extends object ? { [K in keyof T]: T[K] } : T
+
 /** Extract Param Names from a route string */
 type ExtractUrlParamNames<T extends string> =
   T extends `${infer _}:${infer Param}/${infer Rest}`
@@ -37,8 +27,6 @@ type ExtractUrlParamNames<T extends string> =
     : never
 /** Get object of params from url string */
 type UrlParamSchema<Path extends string> = { [K in ExtractUrlParamNames<Path>]: z.ZodSchema<string> }
-/** Replaces `void` with `null` */
-type VoidToNull<T> = T extends void ? null : T
 
 type RouteSchema = {
   path: string
@@ -63,18 +51,27 @@ export type RouteHandler<Schema extends RouteSchema> = (v: {
     : Schema["params"] extends z.ZodSchema<null>
       ? { [K in ExtractUrlParamNames<Schema["path"]>]: string }
       : z.infer<Schema["params"]>
-  data: Schema["data"]
-  req: Request
-  res: Response
-  error: ErrorFunction
+  ctx: Schema["data"]
 }) => void
-
-/** A Middleware function */
-type Middleware<Data extends object | null = null, NewData extends object | null | void = object> = (args: {req: Request, res: Response, data: Data }) => NewData
 
 type ConstrainedSchema<Keys, Schema> = {
   [K in keyof Schema]: K extends Keys ? Schema[K] : never;
 };
+
+type MiddlewareFunction<
+  TData extends object,
+  TDataNew extends object | undefined | void,
+> = (data: TData) => Promise<TDataNew>
+
+type InitialContext = {
+  req: Request
+  res: Response
+}
+type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains properties that are already defined by other middleware" & never;
+
+export function middleware<TData extends InitialContext, TDataNew extends object | undefined>(fn: MiddlewareFunction<TData, TDataNew>) {
+  return fn
+}
 
 /**
  * Route Builder class that allows for easy creation of routes
@@ -85,7 +82,7 @@ export class RouteBuilder<
   TQuery extends z.ZodSchema = z.ZodSchema<null>,
   TCookies extends z.ZodSchema = z.ZodSchema<null>,
   TParams extends z.ZodSchema = z.ZodSchema<null>,
-  TData extends object | null = null,
+  TData extends object = InitialContext,
   Schema extends RouteSchema = { path: Path; body: TBody; query: TQuery; cookies: TCookies, params: TParams, data: TData }
 > {
   public router: Router
@@ -93,7 +90,7 @@ export class RouteBuilder<
   private querySchema?: TQuery
   private cookieSchema?: TCookies
   private paramSchema?: TParams
-  private middleware: Middleware<object | null>[] = []
+  private middleware: MiddlewareFunction<TData, TData>[] = []
   private path: Path
 
   constructor(router: Router, path: Path, opts?: { body?: TBody; cookies?: TCookies; query?: TQuery }) {
@@ -104,10 +101,9 @@ export class RouteBuilder<
     this.cookieSchema = opts?.cookies
   }
 
-  // TODO rewrite this to use return next({}) like trpc
-  use<NewData extends object | null | void>(middleware: Middleware<TData, NewData>) {
-    this.middleware.push(middleware as unknown as Middleware<object | null>)
-    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Combine<TData, VoidToNull<NewData>>>
+  use<TDataNew extends object | undefined | void>(middleware: MiddlewareFunction<TData, NoCommonKeys<TDataNew, TData>>) {
+    this.middleware.push(middleware as unknown as MiddlewareFunction<TData, TData>)
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Flatten<Overwrite<TData, TDataNew>>>
   }
 
   /**
@@ -174,7 +170,7 @@ export class RouteBuilder<
   }
 
   private applyRoute(method: HttpMethod, handler: RouteHandler<Schema>) {
-    this.router[method](this.path, (req, res) => {
+    this.router[method](this.path, async (req, res) => {
       const error = (error: Error) => {
         res.status(error.code).json(error)
       }
@@ -222,27 +218,32 @@ export class RouteBuilder<
         data.cookies = cookies.data
       }
 
-      let middlewareData: null | object = null
+      let middlewareData = { req, res } as unknown as TData
       
-      this.middleware.forEach((middleware) => {
-        const newData = middleware({ req, res, data: middlewareData })
-        if (typeof newData === "object") {
-          middlewareData = { ...middlewareData, ...newData }
+      try {
+        for (const middleware of this.middleware) {
+          const newData = await middleware(middlewareData)
+          if (typeof newData === "object") {
+            middlewareData = { ...middlewareData, ...newData }
+          }
         }
-      })
 
-      // TODO: Add error handling
-      // TODO: Turn return type into a response object
-      handler({
-        body: data.body,
-        cookies: data.cookies,
-        query: data.query,
-        params: data.params as unknown as z.infer<Schema["params"]>,
-        req,
-        res,
-        data: middlewareData as TData,
-        error,
-      })
+        handler({
+          body: data.body,
+          cookies: data.cookies,
+          query: data.query,
+          params: data.params as unknown as z.infer<Schema["params"]>,
+          ctx: middlewareData as TData,
+        })
+      } catch (err) {
+        console.log("ERR", err)
+        if (err instanceof ApiError) {
+          return error(err)
+        } else {
+          console.error(err)
+          return error(Error.INTERNAL_SERVER_ERROR)
+        }
+      }
     })
   }
 

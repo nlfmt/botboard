@@ -4,6 +4,8 @@ import prisma from "@/shared/prisma";
 import { z } from "zod";
 import { createToken, verifyToken } from "@/shared/util/tokens";
 import env from "@/env";
+import { TokenData } from "@/shared/models/token.model";
+import { applicationAuthCheck } from "@/shared/middleware/auth.middleware";
 
 const applicationRouter = createRouter();
 
@@ -11,7 +13,7 @@ applicationRouter
   .path("/:id/token")
   .params({ id: z.string().nonempty() })
   .body(GetTokenModel)
-  .post(async ({ res, body, params }) => {
+  .post(async ({ ctx: { res }, body, params }) => {
     const application = await prisma.application.findUnique({
       where: {
         id: params.id,
@@ -42,29 +44,10 @@ applicationRouter
   })
 
 applicationRouter
-  .path("/")
-  .use(({ req }) => {
-    const authorization = req.headers.authorization;
-    if (!authorization) return null;
-    const [type, token] = authorization.split(" ");
-    if (type !== "Bearer") return null;
-    const tokenData = verifyToken(token);
-    if (!tokenData.success) return null;
-    return {
-      app: tokenData.data,
-    }
+  .path("/me")
+  .use(applicationAuthCheck)
+  .get(async ({ ctx }) => {
+    ctx.app
   })
-  .get(async ({ res, data }) => { })
 
-
-const abc = () => {
-    const authorization: string | undefined = "";//req.headers.authorization;
-    if (!authorization) return;
-    const [type, token] = authorization.split(" ");
-    if (type !== "Bearer") return;
-    const tokenData = verifyToken(token);
-    if (!tokenData.success) return;
-    return {
-      app: tokenData.data,
-    }
-  }
+export default applicationRouter;
