@@ -67,7 +67,7 @@ type InitialContext = {
   req: Request
   res: Response
 }
-type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains properties that are already defined by other middleware" & never;
+type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains a property that is already defined by another middleware" & never;
 
 export function middleware<TData extends InitialContext, TDataNew extends object | undefined>(fn: MiddlewareFunction<TData, TDataNew>) {
   return fn
