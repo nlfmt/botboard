@@ -1,6 +1,5 @@
 import z from "zod"
 import { initEnv } from "./shared/util/init-env"
-import { relativePath } from "./shared/util/path"
 
 /**
  * The environment variables that are required for the server to run.
@@ -10,7 +9,8 @@ export const envModel = z.object({
   ACCESS_TOKEN_EXPIRES_IN: z.string().min(1),
   REFRESH_TOKEN_EXPIRES_IN: z.string().min(1),
 
-  REDIRECT_URI: z.string().min(1),
+  HOST: z.string().min(1),
+  PORT: z.coerce.number().int().min(1).default(3000),
   GITHUB_CLIENT_ID: z.string().min(1),
   GITHUB_CLIENT_SECRET: z.string().min(1),
   DISCORD_CLIENT_ID: z.string().min(1),
@@ -18,10 +18,9 @@ export const envModel = z.object({
   TWITCH_CLIENT_ID: z.string().min(1),
   TWITCH_CLIENT_SECRET: z.string().min(1),
 })
-
-const env = initEnv(envModel, relativePath(
-  import.meta.env.PROD ? "../.env" : "../.env.dev"
-))
+const env = initEnv(envModel,
+  import.meta.env.PROD ? "./.env" : "./.env.dev"
+)
 /**
  * All defined Environment Variables
  */

@@ -4,19 +4,42 @@ import Divider from "@/components/Divider/Divider"
 import Button from "@/components/Button/Button"
 import { AddRounded, SearchRounded } from "@mui/icons-material"
 import TextField from "@/components/TextField/TextField"
+import api from "@/util/api"
+import ApplicationCard from "./ApplicationCard"
 
 const Applications = () => {
+
+  const { data: apps } = api.application.all.useQuery()
+  const { mutateAsync: createApp } = api.application.create.useMutation()
+  const utils = api.useUtils()
+
   return (
     <div className={c.applications}>
-      <Title>Applications</Title>
-      <Divider />
+      <Title className={c.title}>Applications</Title>
       <div className={c.actionBar}>
         <div className={c.searchBar}>
           <TextField icon={<SearchRounded />} placeholder="Search" />
         </div>
         <div className={c.actionButtons}>
-          <Button icon={<AddRounded />}>Create new</Button>
+          <Button icon={<AddRounded />} onClick={async () => {
+            const app = await createApp({
+              name: "New application",
+            })
+            utils.application.all.setData(undefined, apps => (apps ? [...apps, app] : [app]))
+          }}>Create new</Button>
         </div>
+      </div>
+      <Divider />
+      <div className={c.applicationsList}>
+        {!apps ? "Loading..." : (
+          apps.length === 0 ? (
+            "No applications. Create one!"
+          ) : (
+            apps.map(app => (
+              <ApplicationCard key={app.id} app={app} />
+            ))
+          )
+        )}
       </div>
     </div>
   )

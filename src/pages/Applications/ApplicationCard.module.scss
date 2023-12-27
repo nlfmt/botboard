@@ -1,0 +1,18 @@
+.card {
+  display: flex;
+  width: 15rem;
+  height: 10rem;
+  justify-content: flex-end;
+  gap: var(--spacing-m);
+
+  .stats {
+    display: flex;
+    justify-content: space-between;
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-s);
+    }
+  }
+}

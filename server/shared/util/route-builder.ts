@@ -12,6 +12,7 @@ type HttpMethod =
   | "options"
   | "head"
 
+
 export type Overwrite<TType extends object, TWith> = undefined extends TWith
   ? TType & Partial<NonNullable<TWith>>
   : TType & NonNullable<TWith>
@@ -25,6 +26,7 @@ type ExtractUrlParamNames<T extends string> =
     : T extends `${infer _}:${infer Param}`
     ? Param
     : never
+
 /** Get object of params from url string */
 type UrlParamSchema<Path extends string> = { [K in ExtractUrlParamNames<Path>]: z.ZodSchema<string> }
 
@@ -58,6 +60,9 @@ type ConstrainedSchema<Keys, Schema> = {
   [K in keyof Schema]: K extends Keys ? Schema[K] : never;
 };
 
+/**
+ * A middleware function that can be used to modify the context of a route
+ */
 type MiddlewareFunction<
   TData extends object,
   TDataNew extends object | undefined | void,
@@ -69,6 +74,9 @@ type InitialContext = {
 }
 type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains a property that is already defined by another middleware" & never;
 
+/**
+ * Create a middleware function that can be used to modify the context of a route
+ */
 export function middleware<TData extends InitialContext, TDataNew extends object | undefined>(fn: MiddlewareFunction<TData, TDataNew>) {
   return fn
 }
@@ -101,6 +109,11 @@ export class RouteBuilder<
     this.cookieSchema = opts?.cookies
   }
 
+  /**
+   * Add a middleware function to the route
+   * - Data returned from this function will be merged into the context
+   * - use `throw new ApiError(...)` to send an error response and stop the route
+   */
   use<TDataNew extends object | undefined | void>(middleware: MiddlewareFunction<TData, NoCommonKeys<TDataNew, TData>>) {
     this.middleware.push(middleware as unknown as MiddlewareFunction<TData, TData>)
     return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Flatten<Overwrite<TData, TDataNew>>>

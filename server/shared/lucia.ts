@@ -6,17 +6,24 @@ import { github, discord, twitch } from "@lucia-auth/oauth/providers"
 import { prisma as prismaAdapter } from "@lucia-auth/adapter-prisma"
 import { provider } from "./util/auth-provider"
 import { User as PrismaUser } from "@prisma/client"
+import { getUrl } from "./util/helpers"
 
-/** The OAuth redirect URI */
-export const REDIRECT_URI = import.meta.env.PROD
-  ? env.REDIRECT_URI
-  : "http://localhost:3000"
+/** The Hostname and OAuth redirect URI */
+export const HOSTNAME = getUrl(env.HOST, env.PORT)
+export const REDIRECT_URI = "https://" + HOSTNAME
 
 /**
  * The Lucia authentication instance.
  */
 export const auth = lucia({
   env: import.meta.env.PROD ? "PROD" : "DEV",
+  csrfProtection: {
+    allowedSubDomains: "*",
+    host: HOSTNAME
+  },
+  experimental: {
+    debugMode: import.meta.env.DEV,
+  },
   middleware: express(),
   adapter: prismaAdapter(prisma),
   getUserAttributes: (data: PrismaUser): Lucia.DatabaseUserAttributes => {

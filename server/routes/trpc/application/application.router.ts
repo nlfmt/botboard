@@ -9,16 +9,26 @@ export const applicationRouter = createTRPCRouter({
       const application = await ctx.prisma.application.create({
         data: {
           name: input.name,
-          clientSecret: createClientSecret(),
+          secret: createClientSecret(),
           ownerId: ctx.user.userId,
+        },
+        select: { id: true, name: true },
+      })
+
+      return application
+    }),
+  all: protectedProcedure
+    .query(async ({ ctx }) => {
+      const applications = await ctx.prisma.application.findMany({
+        where: {
+          ownerId: ctx.user.userId,
+        },
+        select: {
+          id: true,
+          name: true,
         },
       })
 
-      return {
-        application: {
-          id: application.id,
-          name: application.name,
-        },
-      }
-    }),
+      return applications
+    })
 })
