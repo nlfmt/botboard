@@ -4,6 +4,7 @@ import { httpBatchLink } from "@trpc/client"
 import api, { API_URL } from "./util/api"
 import { RouterProvider } from "react-router-dom"
 import { router } from "@/App.routes"
+import ModalProvider from "./components/ModalProvider/ModalProvider"
 
 function App() {
 
@@ -27,7 +28,9 @@ function App() {
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <ModalProvider>
+          <RouterProvider router={router} />
+        </ModalProvider>
       </QueryClientProvider>
     </api.Provider>
   )

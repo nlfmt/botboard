@@ -10,7 +10,7 @@ const applicationRouter = createRouter();
 
 applicationRouter
   .path("/:id/token")
-  .params({ id: z.string().nonempty() })
+  .params({ id: z.string().min(1) })
   .body(GetTokenModel)
   .post(async ({ ctx: { res }, body, params }) => {
     const application = await prisma.application.findUnique({

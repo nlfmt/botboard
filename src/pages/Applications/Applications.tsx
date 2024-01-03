@@ -6,12 +6,15 @@ import { AddRounded, SearchRounded } from "@mui/icons-material"
 import TextField from "@/components/TextField/TextField"
 import api from "@/util/api"
 import ApplicationCard from "./ApplicationCard"
+import { useModalService } from "@/contexts/modal.context"
+import AddApplication from "@/components/modals/AddApplication/AddApplication"
 
 const Applications = () => {
 
   const { data: apps } = api.application.all.useQuery()
   const { mutateAsync: createApp } = api.application.create.useMutation()
   const utils = api.useUtils()
+  const modalService = useModalService()
 
   return (
     <div className={c.applications}>
@@ -21,11 +24,13 @@ const Applications = () => {
           <TextField icon={<SearchRounded />} placeholder="Search" />
         </div>
         <div className={c.actionButtons}>
-          <Button icon={<AddRounded />} onClick={async () => {
-            const app = await createApp({
-              name: "New application",
-            })
-            utils.application.all.setData(undefined, apps => (apps ? [...apps, app] : [app]))
+          <Button icon={<AddRounded />} onClick={() => {
+            modalService.open(AddApplication, { onConfirm: async () => {
+              const app = await createApp({
+                name: "New application",
+              })
+              utils.application.all.setData(undefined, apps => (apps ? [...apps, app] : [app]))
+            } })
           }}>Create new</Button>
         </div>
       </div>

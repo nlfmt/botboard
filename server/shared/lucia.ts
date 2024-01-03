@@ -21,9 +21,6 @@ export const auth = lucia({
     allowedSubDomains: "*",
     host: HOSTNAME
   },
-  experimental: {
-    debugMode: import.meta.env.DEV,
-  },
   middleware: express(),
   adapter: prismaAdapter(prisma),
   getUserAttributes: (data: PrismaUser): Lucia.DatabaseUserAttributes => {

@@ -60,19 +60,19 @@ type ConstrainedSchema<Keys, Schema> = {
   [K in keyof Schema]: K extends Keys ? Schema[K] : never;
 };
 
+type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains a property that is already defined by another middleware";
 /**
  * A middleware function that can be used to modify the context of a route
  */
 type MiddlewareFunction<
   TData extends object,
   TDataNew extends object | undefined | void,
-> = (data: TData) => Promise<TDataNew>
+> = (data: TData) => Promise<NoCommonKeys<TDataNew, TData>>
 
 type InitialContext = {
   req: Request
   res: Response
 }
-type NoCommonKeys<T, U> = keyof T & keyof U extends never ? T : "Return type contains a property that is already defined by another middleware" & never;
 
 /**
  * Create a middleware function that can be used to modify the context of a route
@@ -103,7 +103,7 @@ export class RouteBuilder<
 
   constructor(router: Router, path: Path, opts?: { body?: TBody; cookies?: TCookies; query?: TQuery }) {
     this.path = path
-    this.router = router || Router()
+    this.router = router
     this.bodySchema = opts?.body
     this.querySchema = opts?.query
     this.cookieSchema = opts?.cookies
@@ -114,7 +114,7 @@ export class RouteBuilder<
    * - Data returned from this function will be merged into the context
    * - use `throw new ApiError(...)` to send an error response and stop the route
    */
-  use<TDataNew extends object | undefined | void>(middleware: MiddlewareFunction<TData, NoCommonKeys<TDataNew, TData>>) {
+  use<TDataNew extends object | undefined | void>(middleware: MiddlewareFunction<TData, TDataNew>) {
     this.middleware.push(middleware as unknown as MiddlewareFunction<TData, TData>)
     return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, TParams, Flatten<Overwrite<TData, TDataNew>>>
   }
@@ -125,7 +125,7 @@ export class RouteBuilder<
    */
   body<BodySchema extends z.ZodSchema>(schema: BodySchema) {
     this.bodySchema = schema as unknown as TBody
-    return this as unknown as RouteBuilder<Path, BodySchema, TQuery, TCookies, TParams>
+    return this as unknown as RouteBuilder<Path, BodySchema, TQuery, TCookies, TParams, TData>
   }
 
   /**
@@ -134,7 +134,7 @@ export class RouteBuilder<
    */
   query<QuerySchema extends z.ZodSchema>(schema: QuerySchema) {
     this.querySchema = schema as unknown as TQuery
-    return this as unknown as RouteBuilder<Path, TBody, QuerySchema, TCookies, TParams>
+    return this as unknown as RouteBuilder<Path, TBody, QuerySchema, TCookies, TParams, TData>
   }
 
   /**
@@ -144,7 +144,7 @@ export class RouteBuilder<
   params<ParamSchema extends UrlParamSchema<Path>>(schema: ConstrainedSchema<ExtractUrlParamNames<Path>, ParamSchema>) {
     const zodSchema = z.object(schema)
     this.paramSchema = zodSchema as unknown as TParams
-    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, typeof zodSchema>
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, TCookies, typeof zodSchema, TData>
   }
 
   /**
@@ -153,7 +153,7 @@ export class RouteBuilder<
    */
   cookies<CookiesSchema extends z.ZodSchema>(schema: CookiesSchema) {
     this.cookieSchema = schema as unknown as TCookies
-    return this as unknown as RouteBuilder<Path, TBody, TQuery, CookiesSchema, TParams>
+    return this as unknown as RouteBuilder<Path, TBody, TQuery, CookiesSchema, TParams, TData>
   }
 
   /**
