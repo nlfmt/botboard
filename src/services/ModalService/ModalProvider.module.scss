@@ -1,0 +1,17 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .modal {
+    padding: var(--spacing-l);
+    border-radius: var(--radius-l);
+    background-color: var(--bg2);
+  }
+}

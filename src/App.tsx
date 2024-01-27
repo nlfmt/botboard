@@ -4,7 +4,7 @@ import { httpBatchLink } from "@trpc/client"
 import api, { API_URL } from "./util/api"
 import { RouterProvider } from "react-router-dom"
 import { router } from "@/App.routes"
-import ModalProvider from "./components/ModalProvider/ModalProvider"
+import ModalProvider from "./services/ModalService/ModalProvider"
 
 function App() {
 

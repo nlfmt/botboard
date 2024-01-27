@@ -83,6 +83,6 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    force: true
+    force: true,
   }
 })

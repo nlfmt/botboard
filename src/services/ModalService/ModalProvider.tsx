@@ -1,6 +1,6 @@
 import { FC, ReactNode, useState } from "react"
 import c from "./ModalProvider.module.scss"
-import { ModalContext, ModalServiceContext, ModalServiceType, useModal } from "@/contexts/modal.context"
+import { ModalContext, ModalService, ModalServiceProvider, useModal } from "@/services/ModalService/modal.context"
 import { createPortal } from "react-dom"
 
 export interface ModalProviderProps {
@@ -15,7 +15,7 @@ const Overlay = (props: { children: ReactNode }) => {
 
   return (
     <div className={c.overlay} onClick={modal.close}>
-      <div className={c.modalContainer} onClick={e => e.stopPropagation()}>
+      <div className={c.modal} onClick={e => e.stopPropagation()}>
         {props.children}
       </div>
     </div>
@@ -33,9 +33,9 @@ const ModalProvider: FC<ModalProviderProps> = (props) => {
 
   return (
     <>
-      <ModalServiceContext.Provider value={{ open: open as ModalServiceType["open"] }}>
+      <ModalServiceProvider value={{ open: open as ModalService["open"] }}>
         {props.children}
-      </ModalServiceContext.Provider>
+      </ModalServiceProvider>
       
       <ModalContext.Provider value={{ close }}>
         {modalRoot && modal && createPortal(

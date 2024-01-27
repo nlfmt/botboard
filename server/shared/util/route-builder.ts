@@ -77,9 +77,12 @@ type InitialContext = {
 /**
  * Create a middleware function that can be used to modify the context of a route
  */
-export function middleware<TData extends InitialContext, TDataNew extends object | undefined>(fn: MiddlewareFunction<TData, TDataNew>) {
-  return fn
-}
+export const middleware = <
+  TData extends InitialContext,
+  TDataNew extends object | undefined
+>(
+  fn: MiddlewareFunction<TData, TDataNew>
+) => fn
 
 /**
  * Route Builder class that allows for easy creation of routes

@@ -6,7 +6,7 @@ import { AddRounded, SearchRounded } from "@mui/icons-material"
 import TextField from "@/components/TextField/TextField"
 import api from "@/util/api"
 import ApplicationCard from "./ApplicationCard"
-import { useModalService } from "@/contexts/modal.context"
+import { useModalService } from "@/services/ModalService/modal.context"
 import AddApplication from "@/components/modals/AddApplication/AddApplication"
 
 const Applications = () => {
