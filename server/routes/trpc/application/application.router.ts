@@ -10,7 +10,7 @@ export const applicationRouter = createTRPCRouter({
         data: {
           name: input.name,
           secret: createClientSecret(),
-          ownerId: ctx.user.userId,
+          ownerId: ctx.user.id,
         },
         select: { id: true, name: true },
       })
@@ -21,7 +21,7 @@ export const applicationRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const applications = await ctx.prisma.application.findMany({
         where: {
-          ownerId: ctx.user.userId,
+          ownerId: ctx.user.id,
         },
         select: {
           id: true,

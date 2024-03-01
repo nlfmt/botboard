@@ -2,7 +2,7 @@ import { TRPCError, initTRPC } from "@trpc/server"
 import prisma from "./prisma"
 import { Request, Response } from "express"
 import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http"
-import { auth } from "./lucia"
+import { checkOrigin, handleRequest} from "./lucia"
 
 export async function createTRPCContext({
   req,
@@ -17,17 +17,21 @@ export async function createTRPCContext({
 const t = initTRPC.context<typeof createTRPCContext>().create()
 
 const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-  const authRequest = auth.handleRequest(ctx.req, ctx.res)
-  const session = await authRequest.validate()
-
-  if (!session) {
+  if (!checkOrigin(ctx.req)) {
+    throw new TRPCError({ code: "FORBIDDEN" })
+  }
+  
+  const { session, user } = await handleRequest(ctx.req, ctx.res)
+    
+  if (!session || !user) {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
   return next({
     ctx: {
       ...ctx,
-      user: session.user,
+      user,
+      session,
     },
   })
 })

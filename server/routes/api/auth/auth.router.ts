@@ -1,5 +1,5 @@
-import { auth, getProvider } from "@/shared/lucia"
-import { OAuthRequestError } from "@lucia-auth/oauth"
+import { lucia, providers, handleRequest } from "@/shared/lucia"
+import { OAuth2RequestError } from "arctic"
 import { createRouter } from "@/shared/util/route-builder"
 import { callbackQuerySchema, providerSchema } from "./auth.types"
 
@@ -9,15 +9,11 @@ authRouter
   .path("/login/:provider")
   .params({ provider: providerSchema })
   .get(async ({ ctx: { req, res }, params }) => {
-    const authRequest = auth.handleRequest(req, res)
-    const session = await authRequest.validate()
+    const { session } = await handleRequest(req, res)
+    if (session) return res.redirect("/")
 
-    if (session) {
-      return res.redirect("/")
-    }
-
-    const provider = getProvider(params.provider)
-    const [url, state] = await provider.getAuthorizationUrl()
+    const provider = providers[params.provider]
+    const { url, state } = await provider.createAuthUrl()
 
     res.cookie(`${params.provider}-oauth-state`, state, {
       httpOnly: true,
@@ -41,43 +37,31 @@ authRouter
       return res.redirect("/login?" + params)
     }
     const storedState = req.cookies[`${params.provider}-oauth-state`]
-    const provider = getProvider(params.provider)
 
     if (
-      !storedState ||
+      !query.code ||
       !query.state ||
-      storedState !== query.state ||
-      typeof query.code !== "string"
+      !storedState ||
+      storedState !== query.state
     ) {
       return res.redirect("/login?error=" + encodeURIComponent("Invalid state"))
     }
+
     try {
-      const { getExistingUser, userData, createUser } =
-        await provider.validateCallback(query.code)
+      const provider = providers[params.provider]
+      const userId = await provider.validateCallback(query.code)
+      const session = await lucia.createSession(userId, {})
 
-      const getUser = async () => {
-        const existingUser = await getExistingUser()
-        if (existingUser) return existingUser
-        const user = await createUser({
-          attributes: userData,
-        })
-        return user
-      }
-
-      const user = await getUser()
-      const session = await auth.createSession({
-        userId: user.userId,
-        attributes: {},
-      })
-      const authRequest = auth.handleRequest(req, res)
-      authRequest.setSession(session)
-
-      // do some cleanup
-      await auth.deleteDeadUserSessions(session.userId)
-
-      res.redirect("/")
+      res.appendHeader(
+        "Set-Cookie",
+        lucia.createSessionCookie(session.id).serialize()
+      )
+      return res.redirect("/")
     } catch (e) {
-      if (e instanceof OAuthRequestError) {
+      if (
+        e instanceof OAuth2RequestError &&
+        e.message === "bad_verification_code"
+      ) {
         return res.sendStatus(400)
       }
       return res.sendStatus(500)
@@ -85,18 +69,15 @@ authRouter
   })
 
 authRouter.path("/logout").get(async ({ ctx: { req, res } }) => {
-  const authRequest = auth.handleRequest(req, res)
-  const session = await authRequest.validate()
+  const { session } = await handleRequest(req, res)
 
   if (!session) {
     return res.sendStatus(401)
   }
 
-  await auth.invalidateSession(session.sessionId)
-  authRequest.setSession(null)
+  await lucia.invalidateSession(session.id)
 
-  await auth.deleteDeadUserSessions(session.userId)
-
+  res.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
   return res.redirect("/login")
 })
 

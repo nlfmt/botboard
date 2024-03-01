@@ -1,28 +1,77 @@
-import { OAuth2ProviderAuth } from "@lucia-auth/oauth"
-import { Auth } from "lucia"
+import { type OAuth2Provider, generateState } from "arctic"
+import { RegisteredDatabaseUserAttributes } from "lucia"
+import prisma from "@/shared/prisma"
+
+type ProviderConfig<
+  Provider extends OAuth2Provider = OAuth2Provider,
+  Tokens = Awaited<ReturnType<Provider["validateAuthorizationCode"]>>
+> = {
+  id: string
+  provider: Provider
+  getUser: (
+    tokens: Tokens
+  ) => Promise<{ externalId: string; user: RegisteredDatabaseUserAttributes }>
+}
 
 /**
  * Create a universally usable provider
  * @param provider the provider to use
  * @param getUser the transformation function to create a db user from the provider user
  */
-export function provider<C extends object, P extends OAuth2ProviderAuth>(
-  auth: Auth,
-  provider: (auth: Auth, config: C) => P,
-  config: C,
-  getUser: (
-    data: Awaited<ReturnType<P["validateCallback"]>>
-  ) => Lucia.DatabaseUserAttributes
+function provider<Provider extends OAuth2Provider, Tokens>(
+  config: ProviderConfig<Provider, Tokens>
 ) {
-  const prv = provider(auth, config)
   return {
-    getAuthorizationUrl: prv.getAuthorizationUrl,
-    validateCallback: async (code: string) => {
-      const data = await prv.validateCallback(code)
-      return {
-        ...data,
-        userData: getUser(data as Awaited<ReturnType<P["validateCallback"]>>),
-      }
+    createAuthUrl: async () => {
+      const state = generateState()
+      const url = await config.provider.createAuthorizationURL(state)
+      return { url, state }
     },
+    validateCallback: async (code: string) => {
+      const tokens = (await config.provider.validateAuthorizationCode(
+        code
+      )) as Tokens
+      const { externalId, user } = await config.getUser(tokens)
+
+      const oauthAcc = await prisma.oauthAccount.findUnique({
+        where: {
+          providerId_providerUserId: {
+            providerId: config.id,
+            providerUserId: externalId,
+          },
+        },
+      })
+
+      if (oauthAcc) {
+        return oauthAcc.userId
+      }
+
+      const newUser = await prisma.user.create({
+        data: {
+          ...user,
+          oauthAccount: {
+            create: {
+              providerId: config.id,
+              providerUserId: externalId,
+            },
+          },
+        },
+        select: { id: true },
+      })
+
+      return newUser.id
+    },
+  }
+}
+
+export function defineProviders<
+  Providers extends Record<string, Omit<ProviderConfig, "id">>
+>(providers: Providers) {
+  const _providers = Object.entries(providers).map(
+    ([id, config]) => [id, provider({ id, ...config })] as const
+  )
+
+  return Object.fromEntries(_providers) as {
+    [K in keyof Providers]: ReturnType<typeof provider>
   }
 }

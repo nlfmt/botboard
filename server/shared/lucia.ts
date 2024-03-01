@@ -1,92 +1,100 @@
 import env from "@/env"
 import prisma from "./prisma"
-import { lucia } from "lucia"
-import { express } from "lucia/middleware"
-import { github, discord, twitch } from "@lucia-auth/oauth/providers"
-import { prisma as prismaAdapter } from "@lucia-auth/adapter-prisma"
-import { provider } from "./util/auth-provider"
+import { Lucia, verifyRequestOrigin } from "lucia"
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma"
 import { User as PrismaUser } from "@prisma/client"
 import { getUrl } from "./util/helpers"
+import { Discord, GitHub } from "arctic"
+import { defineProviders } from "./util/auth-provider"
+import { Request, Response } from "express"
 
-/** The Hostname and OAuth redirect URI */
-export const HOSTNAME = getUrl(env.HOST, env.PORT)
-export const REDIRECT_URI = "https://" + HOSTNAME
+/** The OAuth redirect URI */
+export const REDIRECT_URI = "https://" + getUrl(env.HOST, env.PORT)
+
+const adapter = new PrismaAdapter(prisma.session, prisma.user)
 
 /**
  * The Lucia authentication instance.
  */
-export const auth = lucia({
-  env: import.meta.env.PROD ? "PROD" : "DEV",
-  csrfProtection: {
-    allowedSubDomains: "*",
-    host: HOSTNAME
-  },
-  middleware: express(),
-  adapter: prismaAdapter(prisma),
-  getUserAttributes: (data: PrismaUser): Lucia.DatabaseUserAttributes => {
-    return {
-      name: data.name,
-      email: data.email,
-      avatar: data.avatar,
+export const lucia = new Lucia(adapter, {
+  sessionCookie: {
+    attributes: {
+      secure: import.meta.env.PROD,
     }
   },
-  getSessionAttributes: (): Lucia.DatabaseSessionAttributes => ({}),
+  getUserAttributes(databaseUserAttributes) {
+    return databaseUserAttributes
+  },
+})
+
+export const providers = defineProviders({
+  github: {
+    provider: new GitHub(env.GITHUB_CLIENT_ID, env.GITHUB_CLIENT_SECRET),
+    getUser: async tokens => {
+      return {
+        externalId: tokens.accessToken,
+        user: {
+          name: "github",
+          email: "",
+          avatar: "",
+        }
+      }
+    }
+  },
+  discord: {
+    provider: new Discord(env.GITHUB_CLIENT_ID, env.GITHUB_CLIENT_SECRET, ""),
+    getUser: async tokens => {
+      return {
+        externalId: tokens.accessToken,
+        user: {
+          name: "github",
+          email: "",
+          avatar: "",
+        }
+      }
+    }
+  }
 })
 
 /**
- * All providers that are supported by this application.
+ * Check if the request origin is allowed.
+ * @param req The request object.
+ * @returns 
  */
-export const providers = {
-  github: provider(
-    auth,
-    github,
-    {
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
-    },
-    ({ githubUser }): Lucia.DatabaseUserAttributes => ({
-      name: githubUser.login,
-      email: githubUser.email,
-      avatar: githubUser.avatar_url,
-    })
-  ),
-  discord: provider(
-    auth,
-    discord,
-    {
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-      redirectUri: new URL("/api/auth/callback/discord", REDIRECT_URI).href,
-    },
-    ({ discordUser }): Lucia.DatabaseUserAttributes => {
-      return {
-        name: discordUser.username,
-        email: discordUser.email ?? null,
-        avatar:
-          discordUser.avatar &&
-          `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}?size=480`,
-      }
-    }
-  ),
-  twitch: provider(
-    auth,
-    twitch,
-    {
-      clientId: env.TWITCH_CLIENT_ID,
-      clientSecret: env.TWITCH_CLIENT_SECRET,
-      redirectUri: new URL("/api/auth/callback/twitch", REDIRECT_URI).href,
-    },
-    ({ twitchUser }): Lucia.DatabaseUserAttributes => ({
-      name: twitchUser.login,
-      email: twitchUser.email ?? null,
-      avatar: twitchUser.profile_image_url,
-    })
-  ),
-} as const
-
-export function getProvider(provider: Provider) {
-  return providers[provider]
+export function checkOrigin(req: Request) {
+  if (req.method === "GET") return true
+  const originHeader = req.headers.origin ?? null;
+	// NOTE: You may need to use `X-Forwarded-Host` instead
+	const hostHeader = req.headers.host ?? null;
+	return originHeader && hostHeader && verifyRequestOrigin(originHeader, [hostHeader])
 }
 
-export type Auth = typeof auth
-export type Provider = keyof typeof providers
+/**
+ * Get the session and user from the request.
+ * @param req
+ * @param res 
+ * @returns 
+ */
+export async function handleRequest(req: Request, res: Response) {
+  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "")
+  if (!sessionId) return { session: null, user: null }
+
+  const { session, user } = await lucia.validateSession(sessionId)
+  if (session && session.fresh) {
+    res.appendHeader("Set-Cookie", lucia.createSessionCookie(session.id).serialize())
+  }
+  if (!session) {
+    res.appendHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize())
+  }
+
+  return { session, user }
+}
+
+
+declare module "lucia" {
+  interface Register {
+    Lucia: typeof lucia
+    DatabaseUserAttributes: Omit<PrismaUser, "id">
+  }
+}
+export type Auth = typeof lucia
