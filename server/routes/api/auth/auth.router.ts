@@ -2,6 +2,7 @@ import { lucia, providers, handleRequest } from "@/shared/lucia"
 import { OAuth2RequestError } from "arctic"
 import { createRouter } from "@/shared/util/route-builder"
 import { callbackQuerySchema, providerSchema } from "./auth.types"
+import { Error } from "@/shared/util/error"
 
 const authRouter = createRouter()
 
@@ -62,9 +63,20 @@ authRouter
         e instanceof OAuth2RequestError &&
         e.message === "bad_verification_code"
       ) {
-        return res.sendStatus(400)
+        const params = new URLSearchParams({
+          error: Error.INVALID_AUTH_CODE.name,
+          error_description: Error.INVALID_AUTH_CODE.message ?? "",
+        })
+        return res.redirect("/login?" + params)
       }
-      return res.sendStatus(500)
+
+      console.log(e)
+
+      const params = new URLSearchParams({
+        error: Error.INTERNAL_SERVER_ERROR.name,
+        error_description: Error.INTERNAL_SERVER_ERROR.message ?? "",
+      })
+      return res.redirect("/login?" + params)
     }
   })
 

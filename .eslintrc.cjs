@@ -24,5 +24,7 @@ module.exports = {
         caughtErrorsIgnorePattern: "^_",
       },
     ],
+    "no-unsafe-any": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   },
 }

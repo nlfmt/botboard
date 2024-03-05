@@ -1,59 +1,36 @@
-import env from "@/env"
 import prisma from "./prisma"
 import { Lucia, verifyRequestOrigin } from "lucia"
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma"
 import { User as PrismaUser } from "@prisma/client"
-import { getUrl } from "./util/helpers"
-import { Discord, GitHub } from "arctic"
 import { defineProviders } from "./util/auth-provider"
 import { Request, Response } from "express"
 
-/** The OAuth redirect URI */
-export const REDIRECT_URI = "https://" + getUrl(env.HOST, env.PORT)
+import twitch from "./providers/twitch"
+import discord from "./providers/discord"
+import github from "./providers/github"
 
-const adapter = new PrismaAdapter(prisma.session, prisma.user)
 
 /**
  * The Lucia authentication instance.
  */
-export const lucia = new Lucia(adapter, {
-  sessionCookie: {
-    attributes: {
-      secure: import.meta.env.PROD,
-    }
-  },
-  getUserAttributes(databaseUserAttributes) {
-    return databaseUserAttributes
-  },
-})
+export const lucia = new Lucia(
+  new PrismaAdapter(prisma.session, prisma.user),
+  {
+    sessionCookie: {
+      attributes: {
+        secure: import.meta.env.PROD,
+      }
+    },
+    getUserAttributes(databaseUserAttributes) {
+      return databaseUserAttributes
+    },
+  }
+)
 
 export const providers = defineProviders({
-  github: {
-    provider: new GitHub(env.GITHUB_CLIENT_ID, env.GITHUB_CLIENT_SECRET),
-    getUser: async tokens => {
-      return {
-        externalId: tokens.accessToken,
-        user: {
-          name: "github",
-          email: "",
-          avatar: "",
-        }
-      }
-    }
-  },
-  discord: {
-    provider: new Discord(env.GITHUB_CLIENT_ID, env.GITHUB_CLIENT_SECRET, ""),
-    getUser: async tokens => {
-      return {
-        externalId: tokens.accessToken,
-        user: {
-          name: "github",
-          email: "",
-          avatar: "",
-        }
-      }
-    }
-  }
+  github,
+  discord,
+  twitch
 })
 
 /**

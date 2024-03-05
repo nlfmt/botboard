@@ -39,4 +39,5 @@ export const Error = defineErrors({
   FORBIDDEN: [403, "You are forbidden from performing this action"],
   NOT_FOUND: [404, "Not Found"],
   INTERNAL_SERVER_ERROR: [500, "Internal Server Error"],
+  INVALID_AUTH_CODE: [400, "Invalid authorization code"],
 })
